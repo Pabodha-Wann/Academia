@@ -23,10 +23,11 @@ export function updateProfile(
     name: string,
     reg_number: string,
     gpa: number,
-    credits: number
+    credits: number,
+    avatar_uri: string | null
 ): void {
     db.runSync(
-        "UPDATE profile SET name = ?, reg_number = ?, gpa = ?, credits = ? WHERE id = 1",
-        [name, reg_number, gpa, credits]
+        "UPDATE profile SET name = ?, reg_number = ?, gpa = ?, credits = ?,avatar_uri=? WHERE id = 1",
+        [name, reg_number, gpa, credits, avatar_uri]
     )
 }; 

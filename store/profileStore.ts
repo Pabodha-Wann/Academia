@@ -7,7 +7,7 @@ interface ProfileStore {
     loadProfile: () => void;
     initProfile: (name: string, reg_number: string) => void;
     saveProfile: (
-        name: string, reg_number: string, gpa: number, credits: number
+        name: string, reg_number: string, gpa: number, credits: number, avatar_uri?: string | null
     ) => void;
 }
 
@@ -25,8 +25,8 @@ export const useProfileStore = create<ProfileStore>((set) => ({
         set({ profile })
     },
 
-    saveProfile: (name, reg_number, gpa, credits) => {
-        updateProfile(name, reg_number, gpa, credits)
+    saveProfile: (name, reg_number, gpa, credits, avatar_uri = null) => {
+        updateProfile(name, reg_number, gpa, credits, avatar_uri ?? null)
         const profile = getProfile();
         set({ profile })
     }

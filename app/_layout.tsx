@@ -18,5 +18,14 @@ export default function RootLayout() {
     return () => subscription.remove();
   }, []);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <Stack screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="(tabs)" />
+    <Stack.Screen
+      name="modals/avatar-picker"
+      options={{
+        presentation: 'transparentModal',
+        animation: 'slide_from_bottom',
+      }}
+    />
+  </Stack>;
 }

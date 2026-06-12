@@ -2,8 +2,9 @@ import { useProfileStore } from '@/store/profileStore';
 import { useThemeStore } from '@/store/themestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
+import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type EditableField = 'name' | 'regNumber' | 'gpa' | 'credits' | null;
@@ -183,16 +184,21 @@ export default function Profile() {
                         className="relative mb-5"
                         style={{ width: isSmall ? 100 : 120 }}
                     >
-                        <View
-                            className="rounded-full bg-pink-100 items-center justify-center"
+                        <TouchableOpacity
+                            className="rounded-full bg-pink-100 items-center justify-center overflow-hidden"
                             style={{
                                 width: isSmall ? 100 : 120,
                                 height: isSmall ? 100 : 120,
                                 borderRadius: isSmall ? 50 : 60,
                             }}
+                            onPress={() => router.push('/modals/avatar-picker')}
                         >
-                            <Ionicons name="person" size={isSmall ? 52 : 64} color="#ff4d8d" />
-                        </View>
+                            {profile?.avatar_uri ? (
+                                <Image source={{ uri: profile.avatar_uri }} style={{ width: '100%', height: '100%' }} />
+                            ) : (
+                                <Ionicons name="person" size={isSmall ? 52 : 64} color="#ff4d8d" />
+                            )}
+                        </TouchableOpacity>
                         <View className={`absolute -left-2 top-1 w-8 h-8 rounded-full bg-pink-500 items-center justify-center border-2 ${isDark ? 'border-zinc-950' : 'border-white'}`}>
                             <Ionicons name="checkmark" size={16} color="#fff" />
                         </View>

@@ -31,7 +31,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Academia to access your photos for profile picture."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
