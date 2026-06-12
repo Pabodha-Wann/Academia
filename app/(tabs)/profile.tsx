@@ -3,25 +3,30 @@ import { useThemeStore } from '@/store/themestore';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BlurView } from 'expo-blur';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-function Profile() {
-    const isDark = useThemeStore((state) => state.isDark)
-    const toggleTheme = useThemeStore((state) => state.toggleTheme)
+type EditableField = 'name' | 'regNumber' | 'gpa' | 'credits' | null;
+
+export default function Profile() {
+    const isDark = useThemeStore((state) => state.isDark);
+    const toggleTheme = useThemeStore((state) => state.toggleTheme);
     const { profile, loadProfile, saveProfile, initProfile } = useProfileStore();
     const insets = useSafeAreaInsets();
+    const { width } = useWindowDimensions();
+    const isSmall = width < 380;
 
-    const [editing, setEditing] = useState(false);
+    const [isSetup, setIsSetup] = useState(false);
+    const [editingField, setEditingField] = useState<EditableField>(null);
+
     const [name, setName] = useState("");
     const [regNumber, setRegNumber] = useState("");
     const [gpa, setGpa] = useState("");
     const [credits, setCredits] = useState("");
 
-
     useEffect(() => {
         loadProfile();
-    }, [])
+    }, []);
 
     useEffect(() => {
         if (profile) {
@@ -30,280 +35,419 @@ function Profile() {
             setGpa(profile.gpa.toString());
             setCredits(profile.credits.toString());
         }
-    }, [profile])
-
+    }, [profile]);
 
     function handleSave() {
         if (!name.trim() || !regNumber.trim()) {
             Alert.alert("Error", "Name and registration number are required.");
             return;
         }
-
-        const gpaNum = parseFloat(gpa)
-        const creditsNum = parseInt(credits)
+        const gpaNum = parseFloat(gpa);
+        const creditsNum = parseInt(credits);
 
         if (isNaN(gpaNum) || gpaNum < 0 || gpaNum > 4) {
             Alert.alert("Error", "GPA must be between 0 and 4.");
             return;
         }
-
         if (isNaN(creditsNum) || creditsNum < 0) {
             Alert.alert("Error", "Credits must be a positive number.");
             return;
         }
 
         if (profile) {
-            saveProfile(name.trim(), regNumber.trim(), gpaNum, creditsNum)
+            saveProfile(name.trim(), regNumber.trim(), gpaNum, creditsNum);
         } else {
-            initProfile(name.trim(), regNumber.trim())
+            initProfile(name.trim(), regNumber.trim());
         }
 
-        setEditing(false)
+        setIsSetup(false);
+        setEditingField(null);
     }
 
-    if (!profile && !editing) {
+    const gpaPercent = profile ? Math.min((profile.gpa / 4) * 100, 100) : 0;
+
+    const hasUnsavedChanges = profile && (
+        name.trim() !== profile.name ||
+        regNumber.trim() !== profile.reg_number ||
+        parseFloat(gpa) !== profile.gpa ||
+        parseInt(credits) !== profile.credits
+    );
+
+    const fields = [
+        { label: 'Full Name', value: name, setter: setName, placeholder: 'e.g. Pabodha', keyboard: 'default' },
+        { label: 'Registration Number', value: regNumber, setter: setRegNumber, placeholder: 'e.g. SE/2022/001', keyboard: 'default' },
+        { label: 'Current GPA (0 – 4)', value: gpa, setter: setGpa, placeholder: 'e.g. 3.94', keyboard: 'decimal-pad' },
+        { label: 'Credits Completed', value: credits, setter: setCredits, placeholder: 'e.g. 90', keyboard: 'number-pad' },
+    ];
+
+    if (!profile && !isSetup) {
         return (
-            <View className={`flex-1 items-center justify-center px-6 ${isDark ? "bg-zinc-950" : "bg-gray-50"}`}>
-                <View className={`w-32 h-32 rounded-full items-center justify-center mb-8 ${isDark ? "bg-zinc-900" : "bg-white shadow-sm"}`}>
-                    <Ionicons name="person" size={64} color="#ff4d8d" />
-                    <View className="absolute top-0 right-0 w-8 h-8 bg-pink-500 rounded-full items-center justify-center border-2 border-white">
-                        <Ionicons name="sparkles" size={16} color="white" />
+            <View className={`flex-1 items-center justify-center px-8 ${isDark ? 'bg-zinc-950' : 'bg-white'}`}>
+                <View className="w-40 h-40 rounded-full bg-pink-100 items-center justify-center mb-8">
+                    <Ionicons name="person" size={isSmall ? 64 : 80} color="#ff4d8d" />
+                    <View className={`absolute top-2 right-2 w-8 h-8 rounded-full bg-pink-500 items-center justify-center border-2 ${isDark ? 'border-zinc-950' : 'border-white'}`}>
+                        <Ionicons name="sparkles" size={14} color="#fff" />
                     </View>
                 </View>
-                <Text className={`text-3xl font-bold text-center mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>
+                <Text className={`font-bold text-center mb-3 ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
                     Welcome!
                 </Text>
-                <Text className={`text-base text-center mb-10 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                    Let's set up your profile to personalize your experience.
+                <Text className={`text-sm text-center leading-6 mb-10 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    Let's set up your profile to get started.
                 </Text>
                 <TouchableOpacity
-                    className="bg-pink-500 w-full py-4 rounded-full items-center shadow-sm"
-                    onPress={() => setEditing(true)}
+                    className="bg-pink-500 w-full py-4 rounded-full items-center"
+                    onPress={() => setIsSetup(true)}
+                    activeOpacity={0.85}
                 >
-                    <Text className="text-white font-bold text-lg">
-                        Set Up Profile
-                    </Text>
+                    <Text className="text-white font-bold text-base">Set Up Profile</Text>
                 </TouchableOpacity>
             </View>
-        )
+        );
     }
 
-    if (editing) {
+    if (isSetup && !profile) {
         return (
             <ScrollView
-                className={`flex-1 ${isDark ? "bg-zinc-950" : "bg-gray-50"}`}
-                contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 40, paddingHorizontal: 24 }}
+                className={`flex-1 ${isDark ? 'bg-black' : 'bg-white'}`}
+                contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 48, paddingHorizontal: 24 }}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Header */}
                 <View className="flex-row items-center mb-10">
-                    <TouchableOpacity 
-                        onPress={() => profile ? setEditing(false) : null}
-                        className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${isDark ? 'bg-zinc-900' : 'bg-white shadow-sm'}`}
-                    >
-                        <Ionicons name={profile ? "arrow-back" : "person-outline"} size={20} color={isDark ? '#fff' : '#000'} />
-                    </TouchableOpacity>
-                    <Text className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
-                        {profile ? "Edit Profile" : "Setup Profile"}
-                    </Text>
-                </View>
-
-                <View className={`rounded-[32px] p-6 mb-8 ${isDark ? 'bg-zinc-900' : 'bg-white shadow-sm'}`}>
-                    {/* Full Name */}
-                    <Text className={`text-sm font-medium mb-2 ml-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        Full Name
-                    </Text>
-                    <TextInput
-                        value={name}
-                        onChangeText={setName}
-                        placeholder='e.g. Maria Barry'
-                        placeholderTextColor={isDark ? "#52525b" : "#a1a1aa"}
-                        className={`rounded-2xl px-5 py-4 mb-5 text-base font-medium ${isDark ? "bg-zinc-950 text-white" : "bg-gray-50 text-gray-900"}`}
-                    />
-
-                    {/* Reg Number */}
-                    <Text className={`text-sm font-medium mb-2 ml-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        Registration Number
-                    </Text>
-                    <TextInput
-                        value={regNumber}
-                        onChangeText={setRegNumber}
-                        placeholder="e.g. SE/2022/001"
-                        placeholderTextColor={isDark ? "#52525b" : "#a1a1aa"}
-                        className={`rounded-2xl px-5 py-4 mb-5 text-base font-medium ${isDark ? "bg-zinc-950 text-white" : "bg-gray-50 text-gray-900"}`}
-                    />
-
-                    {/* GPA */}
-                    <Text className={`text-sm font-medium mb-2 ml-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        Current GPA
-                    </Text>
-                    <TextInput
-                        value={gpa}
-                        onChangeText={setGpa}
-                        placeholder="e.g. 3.8"
-                        keyboardType="decimal-pad"
-                        placeholderTextColor={isDark ? "#52525b" : "#a1a1aa"}
-                        className={`rounded-2xl px-5 py-4 mb-5 text-base font-medium ${isDark ? "bg-zinc-950 text-white" : "bg-gray-50 text-gray-900"}`}
-                    />
-
-                    {/* Credits */}
-                    <Text className={`text-sm font-medium mb-2 ml-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        Credits Completed
-                    </Text>
-                    <TextInput
-                        value={credits}
-                        onChangeText={setCredits}
-                        placeholder="e.g. 90"
-                        keyboardType="number-pad"
-                        placeholderTextColor={isDark ? "#52525b" : "#a1a1aa"}
-                        className={`rounded-2xl px-5 py-4 mb-2 text-base font-medium ${isDark ? "bg-zinc-950 text-white" : "bg-gray-50 text-gray-900"}`}
-                    />
-                </View>
-
-                {/* Buttons */}
-                <TouchableOpacity
-                    className="bg-pink-500 py-4 rounded-full items-center mb-4 shadow-sm"
-                    onPress={handleSave}
-                >
-                    <Text className="text-white font-bold text-lg">
-                        Save Profile
-                    </Text>
-                </TouchableOpacity>
-
-                {profile && (
                     <TouchableOpacity
-                        className={`py-4 rounded-full items-center ${isDark ? "bg-zinc-900" : "bg-white shadow-sm"}`}
-                        onPress={() => setEditing(false)}
+                        onPress={() => setIsSetup(false)}
+                        className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}
                     >
-                        <Text className={`font-bold text-lg ${isDark ? "text-gray-300" : "text-gray-700"}`}>
-                            Cancel
-                        </Text>
+                        <Ionicons name="arrow-back" size={20} color={isDark ? '#fff' : '#000'} />
                     </TouchableOpacity>
-                )}
+                    <Text className={`font-bold ${isSmall ? 'text-xl' : 'text-2xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                        Setup Profile
+                    </Text>
+                </View>
+
+                <View className={`rounded-3xl p-6 mb-6 ${isDark ? 'bg-zinc-900' : 'bg-zinc-50'}`}>
+                    {fields.map((field, i) => (
+                        <View key={field.label} className={i < fields.length - 1 ? 'mb-5' : ''}>
+                            <Text className={`text-xs font-semibold mb-2 ml-1 tracking-widest uppercase ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                                {field.label}
+                            </Text>
+                            <TextInput
+                                value={field.value}
+                                onChangeText={field.setter}
+                                placeholder={field.placeholder}
+                                placeholderTextColor={isDark ? '#3f3f46' : '#d4d4d8'}
+                                keyboardType={field.keyboard as any}
+                                className={`rounded-2xl px-5 py-4 text-base font-medium ${isDark ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-900'}`}
+                            />
+                        </View>
+                    ))}
+                </View>
+
+                <TouchableOpacity
+                    className="bg-pink-500 py-4 rounded-full items-center"
+                    onPress={handleSave}
+                    activeOpacity={0.85}
+                >
+                    <Text className="text-white font-bold text-base">Save Profile</Text>
+                </TouchableOpacity>
             </ScrollView>
-        )
+        );
     }
+
     return (
-        <ScrollView
-            className={`flex-1 ${isDark ? 'bg-zinc-950' : 'bg-gray-50'}`}
-            contentContainerStyle={{ paddingTop: insets.top + 16, paddingBottom: 120 }}
-            showsVerticalScrollIndicator={false}
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-            <View className="px-6">
-                {/* Header */}
-                <View className="flex-row items-center justify-between mb-8">
+            <ScrollView
+                className={`flex-1 ${isDark ? 'bg-zinc-950' : 'bg-white'}`}
+                contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 140 }}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View className="flex-row items-center justify-between px-6 mb-6">
                     <View className="w-10" />
-                    <Text className={`text-xl font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    <Text className={`font-semibold text-base tracking-tight ${isDark ? 'text-white' : 'text-zinc-900'}`}>
                         Profile
                     </Text>
-                    <View className={`w-10 h-10 rounded-full items-center justify-center relative ${isDark ? 'bg-zinc-800' : 'bg-white shadow-sm'}`}>
-                        <Ionicons name="notifications-outline" size={20} color={isDark ? '#fff' : '#000'} />
-                        <View className="absolute top-2 right-2.5 w-2 h-2 bg-pink-500 rounded-full" />
+                    <View className="relative">
+                        <View className={`w-10 h-10 rounded-full items-center justify-center ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}>
+                            <Ionicons name="notifications-outline" size={20} color={isDark ? '#fff' : '#000'} />
+                        </View>
+                        <View className={`absolute top-2 right-2 w-2 h-2 rounded-full bg-pink-500 border ${isDark ? 'border-zinc-950' : 'border-white'}`} />
                     </View>
                 </View>
 
-                {/* Main Profile Card */}
-                <View className={`rounded-[32px] p-6 mb-6 overflow-hidden ${isDark ? 'bg-zinc-900' : 'bg-white shadow-sm'}`}>
-                    <View className="items-center mb-6 relative">
-                        {/* Checkmark Badge */}
-                        <View className="absolute top-2 left-10 w-8 h-8 bg-pink-500 rounded-full items-center justify-center border-2 border-white z-10">
-                            <Ionicons name="checkmark" size={16} color="white" />
-                        </View>
-                        
-                        <View className="w-28 h-28 rounded-full bg-pink-100 items-center justify-center mb-4 relative overflow-hidden">
-                            <Ionicons name='person' size={60} color="#ff4d8d" />
-                            {/* Glassmorphism Effect */}
-                            <BlurView 
-                                intensity={60} 
-                                tint={isDark ? "dark" : "light"} 
-                                className="absolute bottom-0 w-full h-1/3 items-center justify-center"
-                            />
-                        </View>
-                        
-                        <View className="flex-row items-center justify-between w-full">
-                            <View>
-                                <Text className={`text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
-                                    {profile?.name}
-                                </Text>
-                                <Text className={`text-sm mt-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                                    {profile?.reg_number}
-                                </Text>
-                            </View>
-                            <TouchableOpacity 
-                                onPress={() => setEditing(true)}
-                                className={`w-10 h-10 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-gray-50 border border-gray-100'}`}
-                            >
-                                <Ionicons name="pencil-outline" size={18} color={isDark ? '#fff' : '#000'} />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Stats / Cards side-by-side */}
-                <View className="flex-row gap-4 mb-8">
-                    <View className={`flex-1 rounded-[32px] p-5 justify-between h-36 ${isDark ? "bg-zinc-900" : "bg-white shadow-sm"}`}>
-                        <View className="flex-row justify-between items-start">
-                            <View className={`px-3 py-1 rounded-full ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`}>
-                                <Text className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>GPA</Text>
-                            </View>
-                            <Ionicons name="arrow-up-outline" size={16} color={isDark ? '#fff' : '#000'} />
-                        </View>
-                        <Text className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {profile?.gpa.toFixed(2)}
-                        </Text>
-                    </View>
-
-                    <View className={`flex-1 rounded-[32px] p-5 justify-between h-36 ${isDark ? "bg-zinc-900" : "bg-white shadow-sm"}`}>
-                        <View className="flex-row justify-between items-start">
-                            <View className={`px-3 py-1 rounded-full ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`}>
-                                <Text className={`text-xs font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Credits</Text>
-                            </View>
-                            <View className={`w-6 h-6 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`}>
-                                <Ionicons name="star" size={12} color={isDark ? '#fff' : '#000'} />
-                            </View>
-                        </View>
-                        <Text className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {profile?.credits}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* Setting Section */}
-                <Text className={`text-lg font-medium mb-4 ml-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Setting
-                </Text>
-
-                {/* Dark Mode Toggle */}
-                <View
-                    className={`flex-row items-center justify-between rounded-full px-6 py-4 mb-4 ${isDark ? "bg-zinc-900" : "bg-white shadow-sm"
-                        }`}
-                >
-                    <View className="flex-row items-center gap-4">
-                        <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-gray-100'}`}>
-                            <Ionicons
-                                name={isDark ? "moon-outline" : "sunny-outline"}
-                                size={18}
-                                color={isDark ? "#fff" : "#000"}
-                            />
-                        </View>
-                        <Text
-                            className={`font-medium ${isDark ? "text-white" : "text-gray-900"
-                                }`}
+                <View className="px-6 mb-7">
+                    <View
+                        className="relative mb-5"
+                        style={{ width: isSmall ? 100 : 120 }}
+                    >
+                        <View
+                            className="rounded-full bg-pink-100 items-center justify-center"
+                            style={{
+                                width: isSmall ? 100 : 120,
+                                height: isSmall ? 100 : 120,
+                                borderRadius: isSmall ? 50 : 60,
+                            }}
                         >
-                            Dark Mode
-                        </Text>
+                            <Ionicons name="person" size={isSmall ? 52 : 64} color="#ff4d8d" />
+                        </View>
+                        <View className={`absolute -left-2 top-1 w-8 h-8 rounded-full bg-pink-500 items-center justify-center border-2 ${isDark ? 'border-zinc-950' : 'border-white'}`}>
+                            <Ionicons name="checkmark" size={16} color="#fff" />
+                        </View>
                     </View>
-                    <Switch
-                        value={isDark}
-                        onValueChange={toggleTheme}
-                        trackColor={{ false: "#e5e7eb", true: "#ff4d8d" }}
-                        thumbColor="#ffffff"
-                    />
+
+                    <View className="w-full">
+                        {editingField === 'name' ? (
+                            <View className="flex-row items-center border-b-2 border-pink-500 py-1 mb-1 w-full">
+                                <TextInput
+                                    autoFocus
+                                    value={name}
+                                    onChangeText={setName}
+                                    onSubmitEditing={() => setEditingField(null)}
+                                    className={`flex-1 font-bold tracking-tight ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-zinc-900'} p-0 m-0`}
+                                    placeholder="Enter your name"
+                                    placeholderTextColor={isDark ? '#52525b' : '#a1a1aa'}
+                                />
+                                <TouchableOpacity onPress={() => setEditingField(null)} className="ml-3 bg-pink-500 rounded-full w-7 h-7 items-center justify-center shadow-sm">
+                                    <Ionicons name="checkmark" size={16} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <TouchableOpacity onPress={() => setEditingField('name')} activeOpacity={0.7} className="mb-1 flex-row items-center">
+                                <Text
+                                    className={`font-bold tracking-tight mr-2 ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}
+                                    numberOfLines={1}
+                                >
+                                    {name || "Enter Name"}
+                                </Text>
+                                <View className={`w-7 h-7 rounded-full items-center justify-center border ${isDark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-200 bg-zinc-50'}`}>
+                                    <Ionicons name="pencil-outline" size={12} color={isDark ? '#a1a1aa' : '#71717a'} />
+                                </View>
+                            </TouchableOpacity>
+                        )}
+
+                        {editingField === 'regNumber' ? (
+                            <View className="flex-row items-center border-b border-pink-500 py-1 w-2/3">
+                                <TextInput
+                                    autoFocus
+                                    value={regNumber}
+                                    onChangeText={setRegNumber}
+                                    onSubmitEditing={() => setEditingField(null)}
+                                    className={`flex-1 text-sm ${isDark ? 'text-white' : 'text-zinc-900'} p-0 m-0`}
+                                    placeholder="e.g. SE/2022/001"
+                                    placeholderTextColor={isDark ? '#52525b' : '#a1a1aa'}
+                                />
+                                <TouchableOpacity onPress={() => setEditingField(null)} className="ml-3 bg-pink-500 rounded-full w-6 h-6 items-center justify-center shadow-sm">
+                                    <Ionicons name="checkmark" size={14} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <TouchableOpacity onPress={() => setEditingField('regNumber')} activeOpacity={0.7} className="flex-row items-center">
+                                <Text className={`text-sm mr-2 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                                    {regNumber || "Enter Reg Number"}
+                                </Text>
+                                <View className={`w-6 h-6 rounded-full items-center justify-center border ${isDark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-200 bg-zinc-50'}`}>
+                                    <Ionicons name="pencil-outline" size={10} color={isDark ? '#a1a1aa' : '#71717a'} />
+                                </View>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+
+                    <View className="w-full mt-6">
+                        <View className="flex-row justify-between items-center mb-3">
+                            <Text className={`text-sm font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-400'}`}>
+                                Academic Standing
+                            </Text>
+                            <Text className={`font-bold tracking-tight ${isSmall ? 'text-lg' : 'text-xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                                {gpaPercent.toFixed(0)}%
+                            </Text>
+                        </View>
+                        <View className={`w-full rounded-full h-1.5 ${isDark ? 'bg-zinc-800' : 'bg-zinc-100'}`}>
+                            <View
+                                className={`rounded-full h-full ${isDark ? 'bg-white' : 'bg-zinc-900'}`}
+                                style={{ width: `${gpaPercent}%` }}
+                            />
+                        </View>
+                    </View>
                 </View>
 
-            </View>
-        </ScrollView>
+                <View className="flex-row px-6 mb-6" style={{ gap: 12 }}>
+                    <View
+                        className="flex-1 rounded-3xl overflow-hidden"
+                        style={{ height: isSmall ? 120 : 140 }}
+                    >
+                        <BlurView
+                            intensity={isDark ? 30 : 70}
+                            tint={isDark ? 'dark' : 'light'}
+                            className="flex-1 p-5 justify-between"
+                        >
+                            <View
+                                className={`absolute inset-0 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-white'}`}
+                                style={{ borderRadius: 24 }}
+                            />
+                            <View className="flex-row justify-between items-center">
+                                <View className={`px-3 py-1 rounded-full ${isDark ? 'bg-white/10' : 'bg-black/5'}`}>
+                                    <Text className={`text-xs font-semibold ${isDark ? 'text-zinc-300' : 'text-zinc-500'}`}>GPA</Text>
+                                </View>
+                            </View>
+
+                            {editingField === 'gpa' ? (
+                                <View className="flex-row items-center border-b-2 border-pink-500 pb-1 mt-2">
+                                    <TextInput
+                                        autoFocus
+                                        value={gpa}
+                                        onChangeText={setGpa}
+                                        onSubmitEditing={() => setEditingField(null)}
+                                        keyboardType="decimal-pad"
+                                        className={`flex-1 font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-zinc-900'} p-0 m-0`}
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => setEditingField(null)}
+                                        className="ml-2 bg-pink-500 rounded-full w-6 h-6 items-center justify-center shadow-sm">
+                                        <Ionicons name="checkmark" size={14} color="#fff" />
+                                    </TouchableOpacity>
+                                </View>
+                            ) : (
+                                <TouchableOpacity
+                                    onPress={() => setEditingField('gpa')}
+                                    activeOpacity={0.7}
+                                    className="mt-2 flex-row items-center justify-between">
+
+                                    <Text className={`font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                                        {gpa || "0.0"}
+                                    </Text>
+                                    <View className={`w-8 h-8 rounded-full items-center justify-center border ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/5'}`}>
+                                        <Ionicons name="pencil" size={12} color={isDark ? '#a1a1aa' : '#71717a'} />
+                                    </View>
+
+                                </TouchableOpacity>
+                            )}
+                        </BlurView>
+                    </View>
+
+                    <View
+                        className="flex-1 rounded-3xl overflow-hidden"
+                        style={{ height: isSmall ? 120 : 140 }}
+                    >
+                        <BlurView
+                            intensity={isDark ? 30 : 70}
+                            tint={isDark ? 'dark' : 'extraLight'}
+                            className="flex-1 p-5 justify-between"
+                        >
+                            <View
+                                className={`absolute inset-0 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-white'}`}
+                                style={{ borderRadius: 24 }}
+                            />
+                            <View className="flex-row justify-between items-center">
+                                <View className={`px-3 py-1 rounded-full ${isDark ? 'bg-white/10' : 'bg-black/5'}`}>
+                                    <Text className={`text-xs font-semibold ${isDark ? 'text-zinc-300' : 'text-zinc-500'}`}>Credits</Text>
+                                </View>
+                            </View>
+
+                            {editingField === 'credits' ? (
+                                <View className="flex-row items-center border-b-2 border-pink-500 pb-1 mt-2">
+                                    <TextInput
+                                        autoFocus
+                                        value={credits}
+                                        onChangeText={setCredits}
+                                        onSubmitEditing={() => setEditingField(null)}
+                                        keyboardType="number-pad"
+                                        className={`flex-1 font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-zinc-900'} p-0 m-0`}
+                                    />
+                                    <TouchableOpacity onPress={() => setEditingField(null)} className="ml-2 bg-pink-500 rounded-full w-6 h-6 items-center justify-center shadow-sm">
+                                        <Ionicons name="checkmark" size={14} color="#fff" />
+                                    </TouchableOpacity>
+                                </View>
+                            ) : (
+                                <TouchableOpacity onPress={() => setEditingField('credits')} activeOpacity={0.7} className="mt-2 flex-row items-center justify-between">
+                                    <Text className={`font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                                        {credits || "0"}
+                                    </Text>
+                                    <View className={`w-8 h-8 rounded-full items-center justify-center border ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/5'}`}>
+                                        <Ionicons name="pencil-outline" size={12} color={isDark ? '#a1a1aa' : '#71717a'} />
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                        </BlurView>
+                    </View>
+                </View>
+
+                <View className="px-6 mt-2">
+                    <Text className={`text-xs font-semibold tracking-widest uppercase mb-4 ml-1 ${isDark ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                        Settings
+                    </Text>
+
+                    <View className={`flex-row items-center justify-between rounded-full px-5 py-3.5 mb-3 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}>
+                        <View className="flex-row items-center" style={{ gap: 14 }}>
+                            <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`}>
+                                <Ionicons name={isDark ? 'moon-outline' : 'sunny-outline'} size={16} color={isDark ? '#fff' : '#000'} />
+                            </View>
+                            <Text className={`text-sm font-medium ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                                Dark Mode
+                            </Text>
+                        </View>
+
+                        <TouchableOpacity
+                            onPress={toggleTheme}
+                            activeOpacity={0.8}
+                            className={`rounded-full justify-center ${isDark ? 'bg-pink-500' : 'bg-zinc-300'}`}
+                            style={{ width: 50, height: 28, paddingHorizontal: 3 }}
+                        >
+                            <View
+                                className="w-6 h-6 rounded-full bg-white items-center justify-center"
+                                style={{ alignSelf: isDark ? 'flex-end' : 'flex-start' }}
+                            >
+                                <Ionicons
+                                    name={isDark ? 'moon' : 'sunny'}
+                                    size={11}
+                                    color={isDark ? '#ff4d8d' : '#f59e0b'}
+                                />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity
+                        className={`flex-row items-center justify-between rounded-full px-5 py-3.5 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}
+                        activeOpacity={0.7}
+                    >
+                        <View className="flex-row items-center" style={{ gap: 14 }}>
+                            <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`}>
+                                <Ionicons name="information-circle-outline" size={16} color={isDark ? '#fff' : '#000'} />
+                            </View>
+                            <Text className={`text-sm font-medium ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                                About
+                            </Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color={isDark ? '#52525b' : '#a1a1aa'} />
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+
+            {hasUnsavedChanges && (
+                <View
+                    className="absolute bottom-6 left-6 right-6"
+                    style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 12,
+                        elevation: 10
+                    }}
+                >
+                    <TouchableOpacity
+                        className="bg-zinc-900 py-4 px-6 rounded-full flex-row items-center justify-between"
+                        onPress={handleSave}
+                        activeOpacity={0.9}
+                    >
+                        <Text className="text-white font-semibold text-base">Unsaved changes</Text>
+                        <View className="bg-pink-500 px-4 py-1.5 rounded-full">
+                            <Text className="text-white font-bold text-sm">Save</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            )}
+        </KeyboardAvoidingView>
     );
 }
-
-export default Profile;
