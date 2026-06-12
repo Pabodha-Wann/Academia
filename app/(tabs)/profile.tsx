@@ -56,7 +56,7 @@ export default function Profile() {
         }
 
         if (profile) {
-            saveProfile(name.trim(), regNumber.trim(), gpaNum, creditsNum);
+            saveProfile(name.trim(), regNumber.trim(), gpaNum, creditsNum, profile.avatar_uri);
         } else {
             initProfile(name.trim(), regNumber.trim());
         }
