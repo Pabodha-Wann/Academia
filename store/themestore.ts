@@ -8,10 +8,10 @@ interface ThemeStore {
     syncWithSystem: () => void;
 }
 
-export const useThemeStore = create<ThemeStore>((set) => ({
+export const useThemeStore = create<ThemeStore>((set: any) => ({
     isDark: Appearance.getColorScheme() === "dark",
 
-    toggleTheme: () => set((state) => ({
+    toggleTheme: () => set((state: any) => ({
         isDark: !state.isDark
     })),
 
