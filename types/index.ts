@@ -13,3 +13,17 @@ export interface Subject {
     code: string | null;
     color: string;
 }
+
+export interface ScheduleEntry {
+    id: number;
+    subject_id: number;
+    subject_name: string;
+    subject_code: string | null;
+    subject_color: string;
+    lecturer: string;
+    type: string;
+    day: string;
+    start_time: string;
+    end_time: string;
+    location: string | null;
+}
