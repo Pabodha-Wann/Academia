@@ -1,7 +1,7 @@
 import { ScheduleEntry } from "@/types";
 import db from "../db";
 
-export function getScheduleByDay(day: string): ScheduleEntry[] {
+export function getScheduleByDate(date: string): ScheduleEntry[] {
     return db.getAllSync<ScheduleEntry>(`
         SELECT 
         s.id,
@@ -11,7 +11,7 @@ export function getScheduleByDay(day: string): ScheduleEntry[] {
         sub.color as subject_color,
         s.lecturer,
         s.type,
-        s.day,
+        s.day as date,
         s.start_time,
         s.end_time,
         s.location
@@ -19,14 +19,14 @@ export function getScheduleByDay(day: string): ScheduleEntry[] {
         JOIN subjects sub ON s.subject_id = sub.id
         WHERE s.day = ?
         ORDER BY s.start_time ASC
-    `, [day])
+    `, [date])
 }
 
 export function addScheduleEntry(
     subject_id: number,
     lecturer: string,
     type: string,
-    day: string,
+    date: string,
     start_time: string,
     end_time: string,
     location: string
@@ -34,7 +34,7 @@ export function addScheduleEntry(
     db.runSync(
         `INSERT INTO schedule (subject_id, lecturer, type, day, start_time, end_time, location)
         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [subject_id, lecturer, type, day, start_time, end_time, location]
+        [subject_id, lecturer, type, date, start_time, end_time, location]
     )
 }
 

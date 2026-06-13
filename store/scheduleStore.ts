@@ -1,49 +1,50 @@
-import { addScheduleEntry, deleteSchedule, getScheduleByDay } from "@/database/queries/schedule";
+import { addScheduleEntry, deleteSchedule, getScheduleByDate } from "@/database/queries/schedule";
 import { ScheduleEntry } from "@/types";
+import { format } from "date-fns";
 import { create } from "zustand";
 
 interface ScheduleStore {
     entries: ScheduleEntry[];
-    selectedDay: string;
-    loadSchedule: (day: string) => void;
-    setSelectedDay: (day: string) => void;
+    selectedDate: string;
+    loadSchedule: (date: string) => void;
+    setSelectedDate: (date: string) => void;
     addEntry: (
         subject_id: number,
         lecturer: string,
         type: string,
-        day: string,
+        date: string,
         start_time: string,
         end_time: string,
         location: string
     ) => void;
-    removeEntry: (id: number, day: string) => void;
+    removeEntry: (id: number, date: string) => void;
 }
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 
 export const useScheduleStore = create<ScheduleStore>((set, get) => ({
     entries: [],
-    selectedDay: DAYS[new Date().getDay()],
+    selectedDate: format(new Date(), 'yyyy-MM-dd'),
 
-    loadSchedule: (day) => {
-        const entries = getScheduleByDay(day)
+    loadSchedule: (date) => {
+        const entries = getScheduleByDate(date)
         set({ entries })
     },
 
-    setSelectedDay: (day) => {
-        const entries = getScheduleByDay(day);
-        set({ selectedDay: day, entries })
+    setSelectedDate: (date) => {
+        const entries = getScheduleByDate(date);
+        set({ selectedDate: date, entries })
     },
 
-    addEntry: (subject_id, lecturer, type, day, start_time, end_time, location) => {
-        addScheduleEntry(subject_id, lecturer, type, day, start_time, end_time, location);
-        const entries = getScheduleByDay(get().selectedDay)
+    addEntry: (subject_id, lecturer, type, date, start_time, end_time, location) => {
+        addScheduleEntry(subject_id, lecturer, type, date, start_time, end_time, location);
+        const entries = getScheduleByDate(get().selectedDate)
         set({ entries })
     },
 
-    removeEntry: (id, day) => {
+    removeEntry: (id, date) => {
         deleteSchedule(id);
-        const entries = getScheduleByDay(day)
+        const entries = getScheduleByDate(date)
         set({ entries })
     }
 }))

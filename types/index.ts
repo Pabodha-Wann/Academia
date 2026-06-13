@@ -22,7 +22,7 @@ export interface ScheduleEntry {
     subject_color: string;
     lecturer: string;
     type: string;
-    day: string;
+    date: string;
     start_time: string;
     end_time: string;
     location: string | null;
