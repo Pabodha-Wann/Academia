@@ -1,4 +1,4 @@
-import { addScheduleEntry, deleteSchedule, getScheduleByDate } from "@/database/queries/schedule";
+import { addScheduleEntry, deleteSchedule, getScheduleByDate, updateScheduleEntry } from "@/database/queries/schedule";
 import { ScheduleEntry } from "@/types";
 import { format } from "date-fns";
 import { create } from "zustand";
@@ -18,6 +18,16 @@ interface ScheduleStore {
         location: string
     ) => void;
     removeEntry: (id: number, date: string) => void;
+    updateEntry: (
+        id: number,
+        subject_id: number,
+        lecturer: string,
+        type: string,
+        date: string,
+        start_time: string,
+        end_time: string,
+        location: string
+    ) => void
 }
 
 
@@ -46,5 +56,10 @@ export const useScheduleStore = create<ScheduleStore>((set, get) => ({
         deleteSchedule(id);
         const entries = getScheduleByDate(date)
         set({ entries })
+    },
+    updateEntry: (id, subject_id, lecturer, type, date, start_time, end_time, location) => {
+        updateScheduleEntry(id, subject_id, lecturer, type, date, start_time, end_time, location);
+        const entries = getScheduleByDate(get().selectedDate);
+        set({ entries });
     }
 }))

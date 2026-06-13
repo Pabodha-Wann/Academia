@@ -119,7 +119,7 @@ export default function Subjects() {
                 {/* Add button */}
                 <TouchableOpacity
                     onPress={openPopup}
-                    className="bg-pink-500 flex-row items-center gap-1.5 px-4 py-2.5 rounded-full"
+                    className="bg-indigo-500 flex-row items-center gap-1.5 px-4 py-2.5 rounded-full"
                     activeOpacity={0.8}
                 >
                     <Ionicons name="add" size={18} color="#fff" />

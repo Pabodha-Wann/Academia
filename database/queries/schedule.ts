@@ -55,3 +55,26 @@ export function calculateDuration(start: string, end: string): string {
     if (mins === 0) return `${hours}h`
     return `${hours}hr ${mins}min`;
 }
+
+export function updateScheduleEntry(
+    id: number,
+    subject_id: number,
+    lecturer: string,
+    type: string,
+    date: string,
+    start_time: string,
+    end_time: string,
+    location: string
+): void {
+    db.runSync(
+        `UPDATE schedule SET subject_id = ?,
+        lecturer = ?,
+        type = ?,
+        day = ?,
+        start_time = ?,
+        end_time = ?,
+        location = ?
+        WHERE id = ?`,
+        [subject_id, lecturer, type, date, start_time, end_time, location, id]
+    )
+}

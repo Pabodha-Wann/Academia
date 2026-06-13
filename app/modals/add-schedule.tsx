@@ -3,7 +3,7 @@ import { useSubjectStore } from '@/store/subjectStore';
 import { useThemeStore } from '@/store/themestore';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
     Alert,
@@ -21,16 +21,22 @@ import {
 const TYPES = ['Physical', 'Online'];
 
 export default function AddSchedule() {
+    const { entryId } = useLocalSearchParams<{ entryId?: string }>();
+    const isEditing = !!entryId;
+
+
     const isDark = useThemeStore((state) => state.isDark);
-    const { selectedDate, addEntry } = useScheduleStore();
+    const { selectedDate, addEntry, updateEntry, entries } = useScheduleStore();
     const { subjects, loadSubjects } = useSubjectStore();
 
-    const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
-    const [lecturer, setLecturer] = useState('');
-    const [type, setType] = useState('Physical');
-    const [location, setLocation] = useState('');
-    const [startTime, setStartTime] = useState('08:00');
-    const [endTime, setEndTime] = useState('10:00');
+    const existingEntry = isEditing ? entries.find((e) => e.id === parseInt(entryId!)) : null;
+
+    const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(existingEntry?.subject_id ?? null);
+    const [lecturer, setLecturer] = useState(existingEntry?.lecturer ?? '');
+    const [type, setType] = useState(existingEntry?.type ?? 'Physical');
+    const [location, setLocation] = useState(existingEntry?.location ?? '');
+    const [startTime, setStartTime] = useState(existingEntry?.start_time ?? '08:00');
+    const [endTime, setEndTime] = useState(existingEntry?.end_time ?? '10:00');
 
     // Popup animation
     const scaleAnim = useRef(new Animated.Value(0.85)).current;
@@ -67,16 +73,31 @@ export default function AddSchedule() {
             Alert.alert('Error', 'Please enter start and end time.');
             return;
         }
-        addEntry(
-            selectedSubjectId,
-            lecturer.trim(),
-            type,
-            selectedDate,
-            startTime,
-            endTime,
-            location.trim()
-        );
-        router.back();
+
+        if (isEditing) {
+            updateEntry(
+                parseInt(entryId!),
+                selectedSubjectId!,
+                lecturer.trim(),
+                type,
+                selectedDate,
+                startTime,
+                endTime,
+                location.trim()
+            );
+            router.back();
+        } else {
+            addEntry(
+                selectedSubjectId,
+                lecturer.trim(),
+                type,
+                selectedDate,
+                startTime,
+                endTime,
+                location.trim()
+            );
+            router.back();
+        }
     }
 
     return (
@@ -121,7 +142,7 @@ export default function AddSchedule() {
                         {/* Header */}
                         <View className="flex-row items-center justify-between mb-5">
                             <Text className={`text-lg font-bold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-                                Add Class — {selectedDate}
+                                {isEditing ? 'Edit Class' : `Add Class - ${selectedDate}`}
                             </Text>
                             <TouchableOpacity
                                 onPress={() => router.back()}
@@ -211,7 +232,7 @@ export default function AddSchedule() {
                         </Text>
                         <TextInput
                             value={location}
-                            onChangeText={setLocation}
+                            onChangeText={locationSetter => setLocation(locationSetter)}
                             placeholder="Room / Zoom link"
                             placeholderTextColor={isDark ? '#52525b' : '#a1a1aa'}
                             className={`rounded-2xl px-4 py-3.5 mb-4 text-base ${isDark ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-900'}`}
@@ -251,7 +272,7 @@ export default function AddSchedule() {
                             activeOpacity={0.8}
                         >
                             <Text className="text-white font-bold text-base">
-                                Add Class
+                                {isEditing ? 'Save Changes' : 'Add Class'}
                             </Text>
                         </TouchableOpacity>
                     </View>

@@ -5,6 +5,7 @@ import { useSubjectStore } from '@/store/subjectStore';
 import { useThemeStore } from '@/store/themestore';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import {
@@ -193,45 +194,59 @@ export default function Schedule() {
                     <View className="flex-1 pb-4">
                       <TouchableOpacity
                         onLongPress={() => handleDelete(entry.id, entry.subject_name)}
+                        onPress={() => router.push({
+                          pathname: '/modals/add-schedule',
+                          params: { entryId: entry.id }
+                        })}
                         activeOpacity={0.8}
-                        className={`rounded-2xl p-4 ${isDark ? 'bg-zinc-900' : 'bg-zinc-50'}`}
+                        className="rounded-3xl overflow-hidden"
                         style={{
                           borderLeftWidth: 3,
                           borderLeftColor: entry.subject_color,
                         }}
                       >
-                        <Text className={`font-bold text-sm mb-0.5 ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-                          {entry.subject_name}
-                        </Text>
-                        {entry.subject_code ? (
-                          <Text className={`text-xs mb-2 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                            {entry.subject_code}
+                        <BlurView
+                          intensity={isDark ? 30 : 70}
+                          tint={isDark ? 'dark' : 'light'}
+                          className="p-4"
+                        >
+                          <View
+                            className={`absolute inset-0 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-white'}`}
+                            style={{ borderRadius: 16 }}
+                          />
+                          <Text className={`font-bold text-sm mb-0.5 ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                            {entry.subject_name}
                           </Text>
-                        ) : null}
+                          {entry.subject_code ? (
+                            <Text className={`text-xs mb-2 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                              {entry.subject_code}
+                            </Text>
+                          ) : null}
 
-                        <View className="flex-row items-center gap-1.5 mb-1">
-                          <Ionicons name="person-circle-outline" size={13} color={isDark ? '#71717a' : '#a1a1aa'} />
-                          <Text className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                            {entry.lecturer}
-                          </Text>
-                        </View>
-
-                        {entry.location ? (
-                          <View className="flex-row items-center gap-1.5 mb-2">
-                            <Ionicons name="location-outline" size={13} color={isDark ? '#71717a' : '#a1a1aa'} />
+                          <View className="flex-row items-center gap-1.5 mb-1">
+                            <Ionicons name="person-circle-outline" size={13} color={isDark ? '#71717a' : '#a1a1aa'} />
                             <Text className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                              {entry.location}
+                              {entry.lecturer}
                             </Text>
                           </View>
-                        ) : null}
 
-                        <View
-                          className={`self-start px-2 py-0.5 rounded-full mt-1 ${entry.type === 'Online' ? 'bg-emerald-500/15' : 'bg-indigo-500/15'}`}
-                        >
-                          <Text className={`text-xs font-semibold ${entry.type === 'Online' ? 'text-emerald-500' : 'text-indigo-500'}`}>
-                            {entry.type}
-                          </Text>
-                        </View>
+                          {entry.location ? (
+                            <View className="flex-row items-center gap-1.5 mb-2">
+                              <Ionicons name="location-outline" size={13} color={isDark ? '#71717a' : '#a1a1aa'} />
+                              <Text className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                {entry.location}
+                              </Text>
+                            </View>
+                          ) : null}
+
+                          <View
+                            className={`self-start px-2 py-0.5 rounded-full mt-1 ${entry.type === 'Online' ? 'bg-emerald-500/15' : 'bg-indigo-500/15'}`}
+                          >
+                            <Text className={`text-xs font-semibold ${entry.type === 'Online' ? 'text-emerald-500' : 'text-indigo-500'}`}>
+                              {entry.type}
+                            </Text>
+                          </View>
+                        </BlurView>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -242,43 +257,50 @@ export default function Schedule() {
         </Animated.ScrollView>
       </Animated.View>
 
-      {/* FAB */}
-      <TouchableOpacity
-        onPress={() =>
-          subjects.length === 0
-            ? Alert.alert('No Subjects', 'Please add subjects first.')
-            : router.push('/modals/add-schedule')
-        }
-        className="absolute bottom-28 right-6 w-14 h-14 bg-indigo-500 rounded-full items-center justify-center"
+      <View
+        className="absolute right-6 gap-4"
         style={{
-          shadowColor: '#6366f1',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 12,
-          elevation: 8,
-          zIndex: 20,
+          bottom: insets.bottom + 80,
+          zIndex: 20
         }}
-        activeOpacity={0.8}
       >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
+        {/* FAB */}
+        <TouchableOpacity
+          onPress={() =>
+            subjects.length === 0
+              ? Alert.alert('No Subjects', 'Please add subjects first.')
+              : router.push('/modals/add-schedule')
+          }
+          className="w-14 h-14 bg-indigo-500 rounded-full items-center justify-center"
+          style={{
+            shadowColor: '#6366f1',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.4,
+            shadowRadius: 12,
+            elevation: 8,
+            zIndex: 20,
+          }}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
 
-      {/* Subjects Button */}
-      <TouchableOpacity
-        onPress={() => router.push('/modals/subjects')}
-        className="absolute bottom-28 left-6 w-14 h-14 bg-zinc-800 rounded-full items-center justify-center"
-        style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 12,
-          elevation: 8,
-          zIndex: 20,
-        }}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="book-outline" size={22} color="#fff" />
-      </TouchableOpacity>
+        {/* Subjects Button */}
+        <TouchableOpacity
+          onPress={() => router.push('/modals/subjects')}
+          className={` w-14 h-14 rounded-full items-center justify-center ${isDark ? 'bg-zinc-100' : 'bg-zinc-800'}`}
+          style={{
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 8,
+          }}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="book-outline" size={22} color={`${isDark ? '#000' : '#fff'}`} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
