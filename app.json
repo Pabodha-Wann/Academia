@@ -37,7 +37,8 @@
         {
           "photosPermission": "Allow Academia to access your photos for profile picture."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

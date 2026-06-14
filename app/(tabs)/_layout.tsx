@@ -11,7 +11,7 @@ function CustomHeader() {
   return (
     <View
       style={{ paddingTop: insets.top + 8 }}
-      className={`flex-row items-center justify-between px-6 pb-4 ${isDark ? 'bg-black border-zinc-900' : 'bg-[#FAFAFA] border-zinc-150'
+      className={`flex-row items-center justify-between px-6 pb-4 ${isDark ? 'bg-[#121212] border-zinc-900' : 'bg-[#FAFAFA] border-zinc-150'
         }`}
     >
       {/* Left side: Logo */}

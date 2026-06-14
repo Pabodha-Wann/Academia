@@ -183,7 +183,8 @@ export default function Profile() {
                                     value={name}
                                     onChangeText={setName}
                                     onSubmitEditing={() => setEditingField(null)}
-                                    className={`flex-1 font-bold tracking-tight text-center ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'} p-0 m-0`}
+                                    className={`flex-1 tracking-tight text-center ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'} p-0 m-0`}
+                                    style={{ fontFamily: 'Poppins_700Bold' }}
                                     placeholder="Enter your name"
                                     placeholderTextColor={isDark ? '#52525b' : '#a1a1aa'}
                                 />
@@ -194,7 +195,8 @@ export default function Profile() {
                         ) : (
                             <TouchableOpacity onPress={() => setEditingField('name')} activeOpacity={0.7} className="mb-1 flex-row items-center justify-center">
                                 <Text
-                                    className={`font-bold tracking-tight mr-2 ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}
+                                    className={`tracking-tight mr-2 ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}
+                                    style={{ fontFamily: 'Poppins_700Bold' }}
                                     numberOfLines={1}
                                 >
                                     {name || "Enter Name"}
@@ -213,6 +215,7 @@ export default function Profile() {
                                     onChangeText={setRegNumber}
                                     onSubmitEditing={() => setEditingField(null)}
                                     className={`flex-1 text-sm text-center ${isDark ? 'text-white' : 'text-[#2A2A2A]'} p-0 m-0`}
+                                    style={{ fontFamily: 'Poppins_400Regular' }}
                                     placeholder="e.g. SE/2022/001"
                                     placeholderTextColor={isDark ? '#52525b' : '#a1a1aa'}
                                 />
@@ -222,7 +225,7 @@ export default function Profile() {
                             </View>
                         ) : (
                             <TouchableOpacity onPress={() => setEditingField('regNumber')} activeOpacity={0.7} className="flex-row items-center justify-center">
-                                <Text className={`text-sm mr-2 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                                <Text className={`text-sm mr-2 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`} style={{ fontFamily: 'Poppins_400Regular' }}>
                                     {regNumber || "Enter Reg Number"}
                                 </Text>
                                 <View className={`w-6 h-6 rounded-full items-center justify-center border ${isDark ? 'border-zinc-800 bg-zinc-900/50' : 'border-zinc-200 bg-zinc-50'}`}>
