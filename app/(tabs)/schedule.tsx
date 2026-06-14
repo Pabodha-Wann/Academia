@@ -11,10 +11,11 @@ import { useEffect, useRef } from 'react';
 import {
   Alert,
   Animated,
+  Linking,
   Text,
   TouchableOpacity,
-  useWindowDimensions,
-  View
+  View,
+  ScrollView
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -33,21 +34,12 @@ export default function Schedule() {
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const { height: screenHeight } = useWindowDimensions();
-  const CALENDAR_HEIGHT = screenHeight * 0.42;
+
 
   useEffect(() => {
     loadSchedule(selectedDate);
   }, []);
 
-
-
-  // Schedule sheet slides up over calendar
-  const sheetTranslateY = scrollY.interpolate({
-    inputRange: [0, CALENDAR_HEIGHT],
-    outputRange: [0, -CALENDAR_HEIGHT],
-    extrapolate: 'clamp',
-  });
 
   // Selected date display
   const selectedDateObj = new Date(selectedDate);
@@ -69,236 +61,261 @@ export default function Schedule() {
 
   return (
     <View
-      className={`flex-1 ${isDark ? 'bg-zinc-950' : 'bg-white'}`}
+      className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`}
       style={{ paddingTop: insets.top }}
     >
       {/* Calendar sits at the back, fixed */}
-      <View style={{ position: 'absolute', top: insets.top, left: 0, right: 0 }}>
+      <View
+        className={`${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`}
+        style={{ zIndex: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 10, elevation: 4 }}>
         <WeekCalendar
           selectedDate={selectedDate}
           onDateSelect={(date) => setSelectedDate(date)}
-          scrollY={scrollY}
         />
       </View>
 
-      {/* Schedule sheet slides over calendar on scroll */}
-      <Animated.View
-        style={{
-          flex: 1,
-          marginTop: CALENDAR_HEIGHT,
-          transform: [{ translateY: sheetTranslateY }],
-          zIndex: 10,
-        }}
+
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 140, paddingTop: 16 }}
       >
-        <Animated.ScrollView
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: false }
-          )}
-          scrollEventThrottle={16}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 140 }}
+        <View
+          className='px-6'
         >
-          {/* Sheet handle + date label */}
-          <View
-            className={`rounded-t-3xl pt-3 pb-4 px-6 ${isDark ? 'bg-zinc-950' : 'bg-white'}`}
-            style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: -4 },
-              shadowOpacity: isDark ? 0.4 : 0.06,
-              shadowRadius: 12,
-              elevation: 12,
-            }}
-          >
-            {/* Drag handle */}
-            <View className="items-center mb-4">
-              <View
-                className={`w-10 h-1 rounded-full ${isDark ? 'bg-zinc-700' : 'bg-zinc-200'}`}
-              />
-            </View>
-
-            {/* Date row */}
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-3">
-                {/* Date pill like screenshot */}
-                <View className="bg-indigo-600 w-10 h-10 rounded-2xl items-center justify-center">
-                  <Text className="text-white font-bold text-base">
-                    {format(selectedDateObj, 'd')}
-                  </Text>
-                </View>
-                <View>
-                  <Text className={`text-base font-bold ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-                    {isToday ? "Today's Schedule" : format(selectedDateObj, 'EEEE')}
-                  </Text>
-                  <Text className={`text-xs ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                    {format(selectedDateObj, 'MMMM yyyy')}
-                  </Text>
-                </View>
+          <Text className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
+            {isToday ? "Today's Schedule" : format(selectedDateObj, 'EEEE')}
+          </Text>
+          {entries.length === 0 ? (
+            <View className="items-center py-16">
+              <View className={`w-16 h-16 rounded-full items-center justify-center mb-3 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}>
+                <Ionicons
+                  name="calendar-outline"
+                  size={28}
+                  color={isDark ? '#52525b' : '#a1a1aa'}
+                />
               </View>
-
-              <Text className={`text-xs font-medium ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                {entries.length} {entries.length === 1 ? 'class' : 'classes'}
+              <Text className={`text-sm font-semibold ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                No classes scheduled
+              </Text>
+              <Text className={`text-xs mt-1 ${isDark ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                Tap + to add a class
               </Text>
             </View>
-          </View>
+          ) : (
+            <View className="pb-10">
+              {entries.map((entry) => {
 
-          {/* Schedule entries */}
-          <View
-            className={`flex-1 px-6 pt-4 ${isDark ? 'bg-zinc-950' : 'bg-white'}`}
-          >
-            {entries.length === 0 ? (
-              <View className="items-center py-16">
-                <View className={`w-16 h-16 rounded-full items-center justify-center mb-3 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}>
-                  <Ionicons
-                    name="calendar-outline"
-                    size={28}
-                    color={isDark ? '#52525b' : '#a1a1aa'}
-                  />
-                </View>
-                <Text className={`text-sm font-semibold ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                  No classes scheduled
-                </Text>
-                <Text className={`text-xs mt-1 ${isDark ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                  Tap + to add a class
-                </Text>
-              </View>
-            ) : (
-              <View>
-                {entries.map((entry, index) => (
-                  <View key={entry.id} className="flex-row">
-                    {/* Time */}
-                    <View className="w-16 pt-1 items-end pr-3">
+                const isOnline = entry.type === 'Online';
+                const meetingLink = entry.location?.startsWith('http') ? entry.location : null;
+                const displayLocation = meetingLink && entry.location === meetingLink ? 'Online Meeting' : entry.location;
+
+                return (
+                  <View key={entry.id} className="flex-row mb-5">
+                    {/* Time Column */}
+                    <View className="w-[76px] pt-4 items-end pr-4">
                       <Text className={`text-xs font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
                         {formatTime(entry.start_time)}
                       </Text>
-                      <Text className={`text-xs mt-0.5 ${isDark ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                      <Text className={`text-[10px] mt-0.5 font-medium ${isDark ? 'text-zinc-600' : 'text-zinc-400'}`}>
                         {calculateDuration(entry.start_time, entry.end_time)}
                       </Text>
                     </View>
 
-                    {/* Timeline */}
-                    <View className="items-center mr-3">
-                      <View
-                        className="w-2.5 h-2.5 rounded-full mt-1.5"
-                        style={{ backgroundColor: entry.subject_color }}
-                      />
-                      {index < entries.length - 1 && (
-                        <View
-                          className="w-px flex-1 mt-1"
-                          style={{ backgroundColor: entry.subject_color + '30' }}
-                        />
-                      )}
-                    </View>
-
-                    {/* Card */}
-                    <View className="flex-1 pb-4">
+                    {/* Card Column */}
+                    <View className="flex-1">
                       <TouchableOpacity
                         onLongPress={() => handleDelete(entry.id, entry.subject_name)}
                         onPress={() => router.push({
                           pathname: '/modals/add-schedule',
                           params: { entryId: entry.id }
                         })}
-                        activeOpacity={0.8}
-                        className="rounded-3xl overflow-hidden"
-                        style={{
-                          borderLeftWidth: 3,
-                          borderLeftColor: entry.subject_color,
-                        }}
+                        activeOpacity={0.9}
+                        className="rounded-[24px] overflow-hidden"
                       >
-                        <BlurView
-                          intensity={isDark ? 30 : 70}
-                          tint={isDark ? 'dark' : 'light'}
-                          className="p-4"
-                        >
-                          <View
-                            className={`absolute inset-0 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-white'}`}
-                            style={{ borderRadius: 16 }}
-                          />
-                          <Text className={`font-bold text-sm mb-0.5 ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-                            {entry.subject_name}
-                          </Text>
-                          {entry.subject_code ? (
-                            <Text className={`text-xs mb-2 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                              {entry.subject_code}
-                            </Text>
-                          ) : null}
-
-                          <View className="flex-row items-center gap-1.5 mb-1">
-                            <Ionicons name="person-circle-outline" size={13} color={isDark ? '#71717a' : '#a1a1aa'} />
-                            <Text className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                              {entry.lecturer}
-                            </Text>
-                          </View>
-
-                          {entry.location ? (
-                            <View className="flex-row items-center gap-1.5 mb-2">
-                              <Ionicons name="location-outline" size={13} color={isDark ? '#71717a' : '#a1a1aa'} />
-                              <Text className={`text-xs ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                                {entry.location}
-                              </Text>
-                            </View>
-                          ) : null}
-
-                          <View
-                            className={`self-start px-2 py-0.5 rounded-full mt-1 ${entry.type === 'Online' ? 'bg-emerald-500/15' : 'bg-indigo-500/15'}`}
+                        {isDark ? (
+                          <BlurView
+                            intensity={30}
+                            tint="dark"
+                            className="p-4"
+                            style={{
+                              borderLeftWidth: 5,
+                              borderLeftColor: entry.subject_color || '#FCE454',
+                            }}
                           >
-                            <Text className={`text-xs font-semibold ${entry.type === 'Online' ? 'text-emerald-500' : 'text-indigo-500'}`}>
-                              {entry.type}
+                            <View
+                              className="absolute inset-0 border bg-white/5 border-white/10"
+                              style={{ borderRadius: 24 }}
+                              pointerEvents="none"
+                            />
+                            {/* Card Content */}
+                            <View className="flex-row items-center justify-between mb-2">
+                              <View className={`px-2.5 py-0.5 rounded-full ${isOnline ? 'bg-emerald-500/20' : 'bg-[#FCE454]/20'}`}>
+                                <Text className={`text-[10px] font-bold uppercase tracking-wider ${isOnline ? 'text-emerald-400' : 'text-[#FCE454]'}`}>
+                                  {entry.type}
+                                </Text>
+                              </View>
+                              <Ionicons name="ellipsis-vertical" size={14} color="#71717a" />
+                            </View>
+
+                            <Text className="font-bold text-base text-white mb-0.5">
+                              {entry.subject_name}
                             </Text>
+                            {entry.subject_code ? (
+                              <Text className="text-[11px] font-semibold text-zinc-500 mb-2">
+                                {entry.subject_code}
+                              </Text>
+                            ) : null}
+
+                            <View className="flex-row items-center justify-between mt-2 flex-wrap gap-2">
+                              <View className="flex-row items-center gap-1.5">
+                                <Ionicons name="time-outline" size={13} color="#a1a1aa" />
+                                <Text className="text-[11px] font-bold text-zinc-300">
+                                  {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
+                                </Text>
+                              </View>
+
+                              <View className="flex-row items-center gap-3">
+                                {entry.lecturer ? (
+                                  <View className="flex-row items-center gap-1">
+                                    <Ionicons name="person-outline" size={11} color="#71717a" />
+                                    <Text className="text-[10px] font-semibold text-zinc-400">
+                                      {entry.lecturer}
+                                    </Text>
+                                  </View>
+                                ) : null}
+
+                                {displayLocation && !meetingLink ? (
+                                  <View className="flex-row items-center gap-1">
+                                    <Ionicons name="location-outline" size={11} color="#71717a" />
+                                    <Text className="text-[10px] font-semibold text-zinc-400">
+                                      {displayLocation}
+                                    </Text>
+                                  </View>
+                                ) : null}
+                              </View>
+                            </View>
+
+                            {meetingLink && (
+                              <TouchableOpacity
+                                onPress={(e) => {
+                                  e.stopPropagation();
+                                  Linking.openURL(meetingLink).catch(() => Alert.alert("Error", "Could not open the link."));
+                                }}
+                                activeOpacity={0.8}
+                                className="mt-3 bg-zinc-800 py-1.5 px-3 rounded-lg flex-row items-center justify-center gap-1.5 self-start"
+                              >
+                                <Ionicons name="videocam" size={12} color="#FCE454" />
+                                <Text className="text-[#FCE454] font-bold text-[10px]">
+                                  Join Class
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+                          </BlurView>
+                        ) : (
+                          <View
+                            className="bg-white p-4 border border-zinc-100"
+                            style={{
+                              borderLeftWidth: 5,
+                              borderLeftColor: entry.subject_color || '#FCE454',
+                              borderRadius: 24,
+                              shadowColor: '#000',
+                              shadowOffset: { width: 0, height: 2 },
+                              shadowOpacity: 0.02,
+                              shadowRadius: 4,
+                              elevation: 1,
+                            }}
+                          >
+                            <View className="flex-row items-center justify-between mb-2">
+                              <View className={`px-2.5 py-0.5 rounded-full ${isOnline ? 'bg-emerald-50' : 'bg-[#FCE454]/15'}`}>
+                                <Text className={`text-[10px] font-bold uppercase tracking-wider ${isOnline ? 'text-emerald-700' : 'text-[#A18D14]'}`}>
+                                  {entry.type}
+                                </Text>
+                              </View>
+                              <Ionicons name="ellipsis-vertical" size={14} color="#a1a1aa" />
+                            </View>
+
+                            <Text className="font-bold text-base text-[#2A2A2A] mb-0.5">
+                              {entry.subject_name}
+                            </Text>
+                            {entry.subject_code ? (
+                              <Text className="text-[11px] font-semibold text-zinc-400 mb-2">
+                                {entry.subject_code}
+                              </Text>
+                            ) : null}
+
+                            <View className="flex-row items-center justify-between mt-2 flex-wrap gap-2">
+                              <View className="flex-row items-center gap-1.5">
+                                <Ionicons name="time-outline" size={13} color="#71717a" />
+                                <Text className="text-[11px] font-bold text-zinc-600">
+                                  {formatTime(entry.start_time)} - {formatTime(entry.end_time)}
+                                </Text>
+                              </View>
+
+                              <View className="flex-row items-center gap-3">
+                                {entry.lecturer ? (
+                                  <View className="flex-row items-center gap-1">
+                                    <Ionicons name="person-outline" size={11} color="#a1a1aa" />
+                                    <Text className="text-[10px] font-semibold text-zinc-500">
+                                      {entry.lecturer}
+                                    </Text>
+                                  </View>
+                                ) : null}
+
+                                {displayLocation && !meetingLink ? (
+                                  <View className="flex-row items-center gap-1">
+                                    <Ionicons name="location-outline" size={11} color="#a1a1aa" />
+                                    <Text className="text-[10px] font-semibold text-zinc-500">
+                                      {displayLocation}
+                                    </Text>
+                                  </View>
+                                ) : null}
+                              </View>
+                            </View>
+
+                            {meetingLink && (
+                              <TouchableOpacity
+                                onPress={(e) => {
+                                  e.stopPropagation();
+                                  Linking.openURL(meetingLink).catch(() => Alert.alert("Error", "Could not open the link."));
+                                }}
+                                activeOpacity={0.8}
+                                className="mt-3 bg-[#2A2A2A] py-1.5 px-3 rounded-lg flex-row items-center justify-center gap-1.5 self-start"
+                              >
+                                <Ionicons name="videocam" size={12} color="#FCE454" />
+                                <Text className="text-[#FCE454] font-bold text-[10px]">
+                                  Join Class
+                                </Text>
+                              </TouchableOpacity>
+                            )}
                           </View>
-                        </BlurView>
+                        )}
                       </TouchableOpacity>
                     </View>
                   </View>
-                ))}
-              </View>
-            )}
-          </View>
-        </Animated.ScrollView>
-      </Animated.View>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      </ScrollView>
 
-      <View
-        className="absolute right-6 gap-4"
-        style={{
-          bottom: insets.bottom + 80,
-          zIndex: 20
-        }}
-      >
-        {/* FAB */}
+
+      <View className="absolute right-6 gap-4" style={{ bottom: insets.bottom - 40, zIndex: 20 }}>
         <TouchableOpacity
-          onPress={() =>
-            subjects.length === 0
-              ? Alert.alert('No Subjects', 'Please add subjects first.')
-              : router.push('/modals/add-schedule')
-          }
-          className="w-14 h-14 bg-indigo-500 rounded-full items-center justify-center"
-          style={{
-            shadowColor: '#6366f1',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.4,
-            shadowRadius: 12,
-            elevation: 8,
-            zIndex: 20,
-          }}
-          activeOpacity={0.8}
+          onPress={() => subjects.length === 0 ? Alert.alert('No Subjects', 'Please add subjects first.') : router.push('/modals/add-schedule')}
+          className={`w-14 h-14 rounded-full items-center justify-center ${isDark ? 'bg-zinc-100' : 'bg-[#2A2A2A]'}`}
+          style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 8 }}
         >
-          <Ionicons name="add" size={28} color="#fff" />
+          <Ionicons name="add" size={28} color={isDark ? '#2A2A2A' : '#FCE454'} />
         </TouchableOpacity>
 
-        {/* Subjects Button */}
         <TouchableOpacity
           onPress={() => router.push('/modals/subjects')}
-          className={` w-14 h-14 rounded-full items-center justify-center ${isDark ? 'bg-zinc-100' : 'bg-zinc-800'}`}
-          style={{
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 12,
-            elevation: 8,
-          }}
-          activeOpacity={0.8}
+          className="w-14 h-14 rounded-full items-center justify-center bg-[#FCE454]"
+          style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 8 }}
         >
-          <Ionicons name="book-outline" size={22} color={`${isDark ? '#000' : '#fff'}`} />
+          <Ionicons name="book-outline" size={22} color="#2A2A2A" />
         </TouchableOpacity>
       </View>
     </View>

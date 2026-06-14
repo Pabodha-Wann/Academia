@@ -6,35 +6,23 @@ import { Calendar } from 'react-native-calendars';
 interface WeekCalendarProps {
     selectedDate: string;
     onDateSelect: (date: string) => void;
-    scrollY: Animated.Value;
 }
 
-export default function WeekCalendar({ selectedDate, onDateSelect, scrollY }: WeekCalendarProps) {
+export default function WeekCalendar({ selectedDate, onDateSelect }: WeekCalendarProps) {
     const isDark = useThemeStore((state) => state.isDark);
 
     const todayString = format(new Date(), 'yyyy-MM-dd');
 
-    // Collapse animation
-    const calendarHeight = scrollY.interpolate({
-        inputRange: [0, 120],
-        outputRange: [300, 0],
-        extrapolate: 'clamp',
-    });
-    const calendarOpacity = scrollY.interpolate({
-        inputRange: [0, 80],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-    });
-
     const markedDates = {
         [selectedDate]: {
             selected: true,
-            selectedColor: '#4338ca',
+            selectedColor: '#FCE454',
+            selectedTextColor: '#2A2A2A',
         },
         ...(selectedDate !== todayString && {
             [todayString]: {
                 marked: true,
-                dotColor: '#4338ca',
+                dotColor: '#2A2A2A',
             },
         }),
     };
@@ -50,36 +38,30 @@ export default function WeekCalendar({ selectedDate, onDateSelect, scrollY }: We
     const calendarTheme = {
         backgroundColor: 'transparent',
         calendarBackground: 'transparent',
-        monthTextColor: isDark ? '#ffffff' : '#1a1a2e',
+        monthTextColor: isDark ? '#ffffff' : '#2A2A2A',
         textMonthFontWeight: '800' as any,
         textMonthFontSize: 22,
-        arrowColor: isDark ? '#ffffff' : '#1a1a2e',
+        arrowColor: isDark ? '#ffffff' : '#2A2A2A',
         textSectionTitleColor: isDark ? '#52525b' : '#a0a0b0',
         textDayHeaderFontWeight: '600' as any,
         textDayHeaderFontSize: 12,
-        dayTextColor: isDark ? '#e4e4e7' : '#1a1a2e',
+        dayTextColor: isDark ? '#52525b' : '#52525b',
         textDayFontWeight: '600' as any,
-        textDayFontSize: 12,
+        textDayFontSize: 11,
         textDisabledColor: isDark ? '#3f3f46' : '#d4d4d8',
-        selectedDayBackgroundColor: '#4338ca',
-        selectedDayTextColor: '#ffffff',
-        todayTextColor: '#4338ca',
+        selectedDayBackgroundColor: '#FCE454',
+        selectedDayTextColor: '#2A2A2A',
+        todayTextColor: '#2A2A2A',
         todayBackgroundColor: 'transparent',
-        dotColor: '#4338ca',
-        selectedDotColor: '#ffffff',
+        dotColor: '#2A2A2A',
+        selectedDotColor: '#2A2A2A',
     };
 
     return (
         <View className={`${isDark ? 'bg-zinc-950' : 'bg-white'}`}>
 
-            {/* Collapsible Calendar */}
-            <Animated.View
-                style={{
-                    height: calendarHeight,
-                    opacity: calendarOpacity,
-                    overflow: 'hidden',
-                }}
-            >
+            {/* Static Calendar */}
+            <View>
                 <Calendar
                     key={isDark ? 'dark' : 'light'}
                     current={selectedDate}
@@ -104,7 +86,7 @@ export default function WeekCalendar({ selectedDate, onDateSelect, scrollY }: We
                     }}
                     style={{ backgroundColor: 'transparent' }}
                 />
-            </Animated.View>
+            </View>
 
             {/* Always visible bar */}
             <View className={`flex-row items-center justify-between px-5 py-3 ${isDark ? 'bg-zinc-950' : 'bg-white'}`}>
