@@ -27,3 +27,16 @@ export interface ScheduleEntry {
     end_time: string;
     location: string | null;
 }
+
+export interface Task {
+    id: number;
+    subject_id: number | null;
+    subject_name: string | null;
+    subject_color: string | null;
+    title: string;
+    description: string | null;
+    due_date: string;
+    priority: string;
+    status: string;
+    created_at: string;
+}
