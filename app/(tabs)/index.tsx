@@ -5,8 +5,8 @@ import { useTaskStore } from '@/store/taskStore';
 import { useThemeStore } from '@/store/themestore';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
-import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect } from 'react';
 import {
   Image,
   ScrollView,
@@ -63,12 +63,14 @@ export default function Dashboard() {
   const today = format(new Date(), 'yyyy-MM-dd');
   const todayObj = new Date();
 
-  useEffect(() => {
-    loadProfile();
-    loadEntries();
-    loadSchedule(today);
-    loadTasks(today);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadProfile();
+      loadEntries();
+      loadSchedule(today);
+      loadTasks(today);
+    }, [])
+  );
 
   const firstName = profile?.name?.split(' ')[0] ?? 'there';
   const gpaPercent = Math.min((calculatedGpa / 4.0) * 100, 100);
@@ -511,8 +513,8 @@ export default function Dashboard() {
               onPress={() => router.push('/(tabs)/schedule')}
               activeOpacity={0.7}
             >
-              <Text className="text-xs font-semibold text-[#FCE454]">
-                See all →
+              <Text className="text-sm font-semibold text-[#FCE454] uppercase">
+                See all
               </Text>
             </TouchableOpacity>
           </View>
@@ -521,7 +523,6 @@ export default function Dashboard() {
             <View
               className={`rounded-2xl p-6 items-center border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'}`}
             >
-              <Text className="text-3xl mb-2">📭</Text>
               <Text
                 className={`text-sm font-semibold ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}
               >
@@ -597,8 +598,8 @@ export default function Dashboard() {
               onPress={() => router.push('/(tabs)/tasks')}
               activeOpacity={0.7}
             >
-              <Text className="text-xs font-semibold text-[#FCE454]">
-                See all →
+              <Text className="text-sm font-semibold text-[#FCE454] uppercase">
+                See all
               </Text>
             </TouchableOpacity>
           </View>
@@ -607,7 +608,6 @@ export default function Dashboard() {
             <View
               className={`rounded-2xl p-6 items-center border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'}`}
             >
-              <Text className="text-3xl mb-2">✅</Text>
               <Text
                 className={`text-sm font-semibold ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}
               >
