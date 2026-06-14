@@ -81,6 +81,15 @@ export default function RootLayout() {
           animation: 'slide_from_bottom',
         }}
       />
+
+      <Stack.Screen
+        name="modals/gpa-calculator"
+        options={{
+          presentation: 'card',
+          animation: 'slide_from_bottom',
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
