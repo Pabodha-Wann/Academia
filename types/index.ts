@@ -40,3 +40,13 @@ export interface Task {
     status: string;
     created_at: string;
 }
+
+export interface GpaEntry {
+    id: number;
+    subject: string;
+    grade: string;
+    grade_point: number;
+    credits: number;
+    semester: string | null;
+    created_at: string;
+}

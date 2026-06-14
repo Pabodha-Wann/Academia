@@ -50,6 +50,16 @@ export function initializeDatabase() {
       scheduled_at TEXT NOT NULL,
       notif_id     TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS gpa_entries (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      subject     TEXT NOT NULL,
+      grade       TEXT NOT NULL,
+      grade_point REAL NOT NULL,
+      credits     INTEGER NOT NULL,
+      semester    TEXT,
+      created_at  TEXT DEFAULT (datetime('now'))
+    );
   `);
 
   console.log("✅ Database ready!");
