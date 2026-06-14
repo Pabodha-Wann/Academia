@@ -1,4 +1,4 @@
-import { addTask, deleteTask, getTaskByDate, toggleTaskStatus, updateTask } from "@/database/queries/tasks";
+import { addTask, deleteTask, getTaskByDate, toggleTaskStatus, updateTask, getAllTasks } from "@/database/queries/tasks";
 import { Task } from "@/types";
 import { format } from "date-fns";
 import { create } from "zustand";
@@ -8,10 +8,10 @@ type FilterStatus = 'all' | 'pending' | 'done';
 
 interface TaskStore {
     tasks: Task[],
-    selectedDate: string,
+    selectedDate: string | null,
     filterStatus: FilterStatus,
-    loadTasks: (date: string) => void;
-    setSelectedDate: (date: string) => void;
+    loadTasks: (date: string | null) => void;
+    setSelectedDate: (date: string | null) => void;
     setFilterStatus: (filter: FilterStatus) => void;
     addTask: (
         subject_id: number | null,
@@ -39,12 +39,12 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     filterStatus: 'all',
 
     loadTasks: (date) => {
-        const tasks = getTaskByDate(date)
+        const tasks = date ? getTaskByDate(date) : getAllTasks()
         set({ tasks })
     },
 
     setSelectedDate: (date) => {
-        const tasks = getTaskByDate(date);
+        const tasks = date ? getTaskByDate(date) : getAllTasks();
         set({ selectedDate: date, tasks })
     },
 
@@ -54,25 +54,25 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
     addTask: (subject_id, title, description, due_date, priority) => {
         addTask(subject_id, title, description, due_date, priority);
-        const tasks = getTaskByDate(get().selectedDate);
+        const tasks = get().selectedDate ? getTaskByDate(get().selectedDate!) : getAllTasks();
         set({ tasks });
     },
 
     updateTask: (id, subject_id, title, description, due_date, priority) => {
         updateTask(id, subject_id, title, description, due_date, priority);
-        const tasks = getTaskByDate(get().selectedDate);
+        const tasks = get().selectedDate ? getTaskByDate(get().selectedDate!) : getAllTasks();
         set({ tasks });
     },
 
     toggleTaskStatus: (id, currentStatus) => {
         toggleTaskStatus(id, currentStatus);
-        const tasks = getTaskByDate(get().selectedDate)
+        const tasks = get().selectedDate ? getTaskByDate(get().selectedDate!) : getAllTasks();
         set({ tasks })
     },
 
     removeTask: (id) => {
         deleteTask(id)
-        const tasks = getTaskByDate(get().selectedDate)
+        const tasks = get().selectedDate ? getTaskByDate(get().selectedDate!) : getAllTasks();
         set({ tasks })
     },
 

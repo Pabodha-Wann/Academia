@@ -20,6 +20,7 @@ export default function RootLayout() {
 
   return <Stack screenOptions={{ headerShown: false }}>
     <Stack.Screen name="(tabs)" />
+
     <Stack.Screen
       name="modals/avatar-picker"
       options={{
@@ -27,12 +28,29 @@ export default function RootLayout() {
         animation: 'slide_from_bottom',
       }}
     />
+
     <Stack.Screen
-      name="modalse/subjects"
+      name="modals/subjects"
       options={{
         presentation: 'modal',
         animation: 'simple_push'
       }} />
+
+    <Stack.Screen
+      name="modals/add-schedule"
+      options={{
+        presentation: 'transparentModal',
+        animation: 'simple_push',
+      }}
+    />
+
+    <Stack.Screen
+      name="modals/add-task"
+      options={{
+        presentation: 'transparentModal',
+        animation: 'slide_from_bottom',
+      }}
+    />
 
   </Stack>;
 }
