@@ -8,6 +8,7 @@ import {
   Poppins_900Black,
   useFonts,
 } from '@expo-google-fonts/poppins';
+import * as Notifications from 'expo-notifications';
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from "react";
@@ -15,6 +16,16 @@ import { Appearance } from "react-native";
 import '../global.css';
 
 SplashScreen.preventAutoHideAsync();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export default function RootLayout() {
   const syncWithSystem = useThemeStore((state) => state.syncWithSystem);
@@ -45,6 +56,17 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !fontError) {
     return null;
+  }
+
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
+  async function requestNotificationPermission() {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('Notification permission denied');
+    }
   }
 
   return (
