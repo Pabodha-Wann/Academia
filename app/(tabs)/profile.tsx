@@ -143,23 +143,10 @@ export default function Profile() {
         >
             <ScrollView
                 className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`}
-                contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 140 }}
+                contentContainerStyle={{ paddingTop: 24, paddingBottom: 140 }}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* Header */}
-                <View className="flex-row items-center justify-between px-6 mb-6">
-                    <View className="w-10" />
-                    <Text className={`font-bold text-lg tracking-tight ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
-                        Profile
-                    </Text>
-                    <View className="relative">
-                        <View className={`w-10 h-10 rounded-full items-center justify-center border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'}`}>
-                            <Ionicons name="notifications-outline" size={20} color={isDark ? '#fff' : '#2A2A2A'} />
-                        </View>
-                        <View className={`absolute top-2 right-2 w-2 h-2 rounded-full bg-[#FCE454] border ${isDark ? 'border-[#121212]' : 'border-white'}`} />
-                    </View>
-                </View>
 
                 {/* Profile Avatar (Centered) */}
                 <View className="px-6 mb-7 items-center">

@@ -1,15 +1,50 @@
 import { useThemeStore } from "@/store/themestore";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+function CustomHeader() {
+  const isDark = useThemeStore((state) => state.isDark);
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View
+      style={{ paddingTop: insets.top + 8 }}
+      className={`flex-row items-center justify-between px-6 pb-4 ${isDark ? 'bg-black border-zinc-900' : 'bg-[#FAFAFA] border-zinc-150'
+        }`}
+    >
+      {/* Left side: Logo */}
+      <View className="flex-row items-center gap-2">
+        <Image source={require("@/assets/images/logo.png")} className="w-8 h-8" />
+        <Text className={`text-lg font-black tracking-widest ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
+          ACADEMIA
+        </Text>
+      </View>
+
+      {/* Right side: Notification Button */}
+      <View className="relative">
+        <TouchableOpacity
+          activeOpacity={0.7}
+          className={`w-10 h-10 rounded-full items-center justify-center border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'
+            }`}
+        >
+          <Ionicons name="notifications-outline" size={20} color={isDark ? '#fff' : '#2A2A2A'} />
+        </TouchableOpacity>
+        <View className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#FCE454] border ${isDark ? 'border-[#121212]' : 'border-white'}`} />
+      </View>
+    </View>
+  );
+}
 
 export default function TabsLayout() {
-
   const isDark = useThemeStore((state) => state.isDark);
 
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        header: () => <CustomHeader />,
         tabBarActiveTintColor: isDark ? "#ffffff" : "#111111",
         tabBarInactiveTintColor: isDark ? "#6b7280" : "#9ca3af",
         tabBarStyle: {

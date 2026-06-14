@@ -48,7 +48,7 @@ export default function Tasks() {
     }
 
     return (
-        <View className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`} style={{ paddingTop: insets.top }}>
+        <View className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
 
                 {/* Custom Header matching Mockup */}

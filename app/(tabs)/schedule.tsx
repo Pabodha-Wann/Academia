@@ -62,7 +62,6 @@ export default function Schedule() {
   return (
     <View
       className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`}
-      style={{ paddingTop: insets.top }}
     >
       {/* Calendar sits at the back, fixed */}
       <View
