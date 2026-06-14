@@ -6,7 +6,7 @@ import { useThemeStore } from '@/store/themestore';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import {
   Image,
   ScrollView,
@@ -95,48 +95,48 @@ export default function Dashboard() {
   return (
     <View
       className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`}
-      style={{ paddingTop: insets.top }}
     >
+      {/* ── HEADER ── */}
+      <View className="px-6 pt-5 pb-3">
+        <View className="flex-row items-start justify-between">
+          <View className="flex-1 pr-4">
+            <Text
+              className={`text-3xl font-black tracking-tight ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}
+            >
+              {getGreeting()},{'\n'}{firstName}
+            </Text>
+            <Text
+              className={`text-sm mt-1.5 font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}
+            >
+              {format(todayObj, "EEEE, d MMMM yyyy")}
+            </Text>
+          </View>
+
+          {/* Avatar */}
+          <TouchableOpacity
+            onPress={() => router.push('/(tabs)/profile')}
+            activeOpacity={0.8}
+          >
+            {profile?.avatar_uri ? (
+              <Image
+                source={{ uri: profile.avatar_uri }}
+                className="w-14 h-14 rounded-full"
+              />
+            ) : (
+              <View
+                className={`w-14 h-14 rounded-full items-center justify-center border-2 ${isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-200 border-zinc-300'}`}
+              >
+                <Text className="text-2xl">🎓</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="pb-36"
       >
-        {/* ── HEADER ── */}
-        <View className="px-6 pt-5 pb-3">
-          <View className="flex-row items-start justify-between">
-            <View className="flex-1 pr-4">
-              <Text
-                className={`text-3xl font-black tracking-tight ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}
-              >
-                {getGreeting()},{'\n'}{firstName}
-              </Text>
-              <Text
-                className={`text-sm mt-1.5 font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}
-              >
-                {format(todayObj, "EEEE, d MMMM yyyy")}
-              </Text>
-            </View>
-
-            {/* Avatar */}
-            <TouchableOpacity
-              onPress={() => router.push('/(tabs)/profile')}
-              activeOpacity={0.8}
-            >
-              {profile?.avatar_uri ? (
-                <Image
-                  source={{ uri: profile.avatar_uri }}
-                  className="w-14 h-14 rounded-full"
-                />
-              ) : (
-                <View
-                  className={`w-14 h-14 rounded-full items-center justify-center border-2 ${isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-200 border-zinc-300'}`}
-                >
-                  <Text className="text-2xl">🎓</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* BENTO STATS GRID */}
         <View className="px-6 mt-5">
