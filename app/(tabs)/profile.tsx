@@ -81,77 +81,57 @@ export default function Profile() {
         { label: 'Credits Completed', value: credits, setter: setCredits, placeholder: 'e.g. 90', keyboard: 'number-pad' },
     ];
 
-    if (!profile && !isSetup) {
+    if (!profile) {
         return (
-            <View className={`flex-1 items-center justify-center px-8 ${isDark ? 'bg-zinc-950' : 'bg-white'}`}>
-                <View className="w-40 h-40 rounded-full bg-pink-100 items-center justify-center mb-8">
-                    <Ionicons name="person" size={isSmall ? 64 : 80} color="#ff4d8d" />
-                    <View className={`absolute top-2 right-2 w-8 h-8 rounded-full bg-pink-500 items-center justify-center border-2 ${isDark ? 'border-zinc-950' : 'border-white'}`}>
-                        <Ionicons name="sparkles" size={14} color="#fff" />
-                    </View>
-                </View>
-                <Text className={`font-bold text-center mb-3 ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-                    Welcome!
-                </Text>
-                <Text className={`text-sm text-center leading-6 mb-10 ${isDark ? 'text-zinc-400' : 'text-zinc-500'}`}>
-                    Let's set up your profile to get started.
-                </Text>
-                <TouchableOpacity
-                    className="bg-pink-500 w-full py-4 rounded-full items-center"
-                    onPress={() => setIsSetup(true)}
-                    activeOpacity={0.85}
-                >
-                    <Text className="text-white font-bold text-base">Set Up Profile</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`}>
+                {/* Hero Section */}
+                <View className="flex-[1.2] bg-[#2A2A2A] rounded-b-[48px] items-center justify-center px-8 relative overflow-hidden" style={{ paddingTop: insets.top }}>
+                    {/* Decorative Elements */}
+                    <View className="absolute -top-10 -right-10 w-40 h-40 bg-[#FCE454]/10 rounded-full" />
+                    <View className="absolute bottom-10 -left-10 w-24 h-24 bg-[#FCE454]/20 rounded-full" />
 
-    if (isSetup && !profile) {
-        return (
-            <ScrollView
-                className={`flex-1 ${isDark ? 'bg-black' : 'bg-white'}`}
-                contentContainerStyle={{ paddingTop: insets.top + 24, paddingBottom: 48, paddingHorizontal: 24 }}
-                showsVerticalScrollIndicator={false}
-            >
-                <View className="flex-row items-center mb-10">
-                    <TouchableOpacity
-                        onPress={() => setIsSetup(false)}
-                        className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}
-                    >
-                        <Ionicons name="arrow-back" size={20} color={isDark ? '#fff' : '#000'} />
-                    </TouchableOpacity>
-                    <Text className={`font-bold ${isSmall ? 'text-xl' : 'text-2xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-                        Setup Profile
+                    <View className="w-28 h-28 bg-[#FCE454] rounded-[32px] items-center justify-center rotate-12 shadow-lg mb-8">
+                        <Ionicons name="rocket" size={56} color="#2A2A2A" style={{ transform: [{ rotate: '-12deg' }] }} />
+                    </View>
+                    <Text className="text-white text-4xl font-black text-center tracking-tight">
+                        Own Your{'\n'}Semester.
+                    </Text>
+                    <Text className="text-zinc-400 text-center mt-4 font-medium text-base px-2">
+                        The ultimate companion to track tasks, ace your schedule, and boost your GPA.
                     </Text>
                 </View>
 
-                <View className={`rounded-3xl p-6 mb-6 ${isDark ? 'bg-zinc-900' : 'bg-zinc-50'}`}>
-                    {fields.map((field, i) => (
-                        <View key={field.label} className={i < fields.length - 1 ? 'mb-5' : ''}>
-                            <Text className={`text-xs font-semibold mb-2 ml-1 tracking-widest uppercase ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                                {field.label}
-                            </Text>
-                            <TextInput
-                                value={field.value}
-                                onChangeText={field.setter}
-                                placeholder={field.placeholder}
-                                placeholderTextColor={isDark ? '#3f3f46' : '#d4d4d8'}
-                                keyboardType={field.keyboard as any}
-                                className={`rounded-2xl px-5 py-4 text-base font-medium ${isDark ? 'bg-zinc-950 text-white' : 'bg-white text-zinc-900'}`}
-                            />
-                        </View>
-                    ))}
-                </View>
+                {/* Input Section */}
+                <View className="flex-1 px-8 pt-10 pb-10 justify-between">
+                    <View>
+                        <Text className={`text-xs font-bold uppercase tracking-widest mb-3 ml-1 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                            What should we call you?
+                        </Text>
+                        <TextInput
+                            value={name}
+                            onChangeText={setName}
+                            placeholder="Enter your first name..."
+                            placeholderTextColor={isDark ? '#52525b' : '#a1a1aa'}
+                            className={`w-full px-6 py-5 rounded-2xl text-lg font-bold border ${isDark ? 'bg-zinc-900 border-zinc-800 text-white' : 'bg-white border-zinc-200 text-[#2A2A2A]'}`}
+                            style={!isDark && { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.03, shadowRadius: 8 }}
+                        />
+                    </View>
 
-                <TouchableOpacity
-                    className="bg-pink-500 py-4 rounded-full items-center"
-                    onPress={handleSave}
-                    activeOpacity={0.85}
-                >
-                    <Text className="text-white font-bold text-base">Save Profile</Text>
-                </TouchableOpacity>
-            </ScrollView>
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (!name.trim()) { Alert.alert('Oops', 'Please enter your name.'); return; }
+                            initProfile(name.trim(), ""); // Initializes with name only
+                        }}
+                        activeOpacity={0.8}
+                        className={`w-full py-5 rounded-2xl items-center flex-row justify-center gap-2 ${name.trim() ? 'bg-[#FCE454]' : isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`}
+                    >
+                        <Text className={`font-bold text-lg ${name.trim() ? 'text-[#2A2A2A]' : isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                            Let's Go
+                        </Text>
+                        <Ionicons name="arrow-forward" size={20} color={name.trim() ? '#2A2A2A' : isDark ? '#71717a' : '#a1a1aa'} />
+                    </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
         );
     }
 
@@ -161,31 +141,33 @@ export default function Profile() {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
             <ScrollView
-                className={`flex-1 ${isDark ? 'bg-zinc-950' : 'bg-white'}`}
+                className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-[#FAFAFA]'}`}
                 contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 140 }}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
+                {/* Header */}
                 <View className="flex-row items-center justify-between px-6 mb-6">
                     <View className="w-10" />
-                    <Text className={`font-semibold text-base tracking-tight ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                    <Text className={`font-bold text-lg tracking-tight ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
                         Profile
                     </Text>
                     <View className="relative">
-                        <View className={`w-10 h-10 rounded-full items-center justify-center ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}>
-                            <Ionicons name="notifications-outline" size={20} color={isDark ? '#fff' : '#000'} />
+                        <View className={`w-10 h-10 rounded-full items-center justify-center border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'}`}>
+                            <Ionicons name="notifications-outline" size={20} color={isDark ? '#fff' : '#2A2A2A'} />
                         </View>
-                        <View className={`absolute top-2 right-2 w-2 h-2 rounded-full bg-pink-500 border ${isDark ? 'border-zinc-950' : 'border-white'}`} />
+                        <View className={`absolute top-2 right-2 w-2 h-2 rounded-full bg-[#FCE454] border ${isDark ? 'border-[#121212]' : 'border-white'}`} />
                     </View>
                 </View>
 
-                <View className="px-6 mb-7">
+                {/* Profile Avatar (Centered) */}
+                <View className="px-6 mb-7 items-center">
                     <View
                         className="relative mb-5"
                         style={{ width: isSmall ? 100 : 120 }}
                     >
                         <TouchableOpacity
-                            className="rounded-full bg-pink-100 items-center justify-center overflow-hidden"
+                            className={`rounded-full items-center justify-center overflow-hidden border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'}`}
                             style={{
                                 width: isSmall ? 100 : 120,
                                 height: isSmall ? 100 : 120,
@@ -196,34 +178,35 @@ export default function Profile() {
                             {profile?.avatar_uri ? (
                                 <Image source={{ uri: profile.avatar_uri }} style={{ width: '100%', height: '100%' }} />
                             ) : (
-                                <Ionicons name="person" size={isSmall ? 52 : 64} color="#ff4d8d" />
+                                <Ionicons name="person" size={isSmall ? 52 : 64} color={isDark ? '#fff' : '#2A2A2A'} />
                             )}
                         </TouchableOpacity>
-                        <View className={`absolute -left-2 top-1 w-8 h-8 rounded-full bg-pink-500 items-center justify-center border-2 ${isDark ? 'border-zinc-950' : 'border-white'}`}>
-                            <Ionicons name="checkmark" size={16} color="#fff" />
+                        <View className={`absolute -right-2 top-1 w-8 h-8 rounded-full bg-[#FCE454] items-center justify-center border-2 ${isDark ? 'border-[#121212]' : 'border-white'}`}>
+                            <Ionicons name="checkmark" size={16} color="#2A2A2A" />
                         </View>
                     </View>
 
-                    <View className="w-full">
+                    {/* Centered Name and Registration */}
+                    <View className="w-full items-center">
                         {editingField === 'name' ? (
-                            <View className="flex-row items-center border-b-2 border-pink-500 py-1 mb-1 w-full">
+                            <View className="flex-row items-center border-b-2 border-[#FCE454] py-1 mb-1 w-2/3 justify-center">
                                 <TextInput
                                     autoFocus
                                     value={name}
                                     onChangeText={setName}
                                     onSubmitEditing={() => setEditingField(null)}
-                                    className={`flex-1 font-bold tracking-tight ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-zinc-900'} p-0 m-0`}
+                                    className={`flex-1 font-bold tracking-tight text-center ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'} p-0 m-0`}
                                     placeholder="Enter your name"
                                     placeholderTextColor={isDark ? '#52525b' : '#a1a1aa'}
                                 />
-                                <TouchableOpacity onPress={() => setEditingField(null)} className="ml-3 bg-pink-500 rounded-full w-7 h-7 items-center justify-center shadow-sm">
-                                    <Ionicons name="checkmark" size={16} color="#fff" />
+                                <TouchableOpacity onPress={() => setEditingField(null)} className="ml-3 bg-[#2A2A2A] dark:bg-zinc-100 rounded-full w-7 h-7 items-center justify-center shadow-sm">
+                                    <Ionicons name="checkmark" size={16} color={isDark ? '#2A2A2A' : '#FCE454'} />
                                 </TouchableOpacity>
                             </View>
                         ) : (
-                            <TouchableOpacity onPress={() => setEditingField('name')} activeOpacity={0.7} className="mb-1 flex-row items-center">
+                            <TouchableOpacity onPress={() => setEditingField('name')} activeOpacity={0.7} className="mb-1 flex-row items-center justify-center">
                                 <Text
-                                    className={`font-bold tracking-tight mr-2 ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}
+                                    className={`font-bold tracking-tight mr-2 ${isSmall ? 'text-2xl' : 'text-3xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}
                                     numberOfLines={1}
                                 >
                                     {name || "Enter Name"}
@@ -235,22 +218,22 @@ export default function Profile() {
                         )}
 
                         {editingField === 'regNumber' ? (
-                            <View className="flex-row items-center border-b border-pink-500 py-1 w-2/3">
+                            <View className="flex-row items-center border-b border-[#FCE454] py-1 w-2/3 justify-center">
                                 <TextInput
                                     autoFocus
                                     value={regNumber}
                                     onChangeText={setRegNumber}
                                     onSubmitEditing={() => setEditingField(null)}
-                                    className={`flex-1 text-sm ${isDark ? 'text-white' : 'text-zinc-900'} p-0 m-0`}
+                                    className={`flex-1 text-sm text-center ${isDark ? 'text-white' : 'text-[#2A2A2A]'} p-0 m-0`}
                                     placeholder="e.g. SE/2022/001"
                                     placeholderTextColor={isDark ? '#52525b' : '#a1a1aa'}
                                 />
-                                <TouchableOpacity onPress={() => setEditingField(null)} className="ml-3 bg-pink-500 rounded-full w-6 h-6 items-center justify-center shadow-sm">
-                                    <Ionicons name="checkmark" size={14} color="#fff" />
+                                <TouchableOpacity onPress={() => setEditingField(null)} className="ml-3 bg-[#2A2A2A] dark:bg-zinc-100 rounded-full w-6 h-6 items-center justify-center shadow-sm">
+                                    <Ionicons name="checkmark" size={14} color={isDark ? '#2A2A2A' : '#FCE454'} />
                                 </TouchableOpacity>
                             </View>
                         ) : (
-                            <TouchableOpacity onPress={() => setEditingField('regNumber')} activeOpacity={0.7} className="flex-row items-center">
+                            <TouchableOpacity onPress={() => setEditingField('regNumber')} activeOpacity={0.7} className="flex-row items-center justify-center">
                                 <Text className={`text-sm mr-2 ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
                                     {regNumber || "Enter Reg Number"}
                                 </Text>
@@ -261,24 +244,26 @@ export default function Profile() {
                         )}
                     </View>
 
-                    <View className="w-full mt-6">
+                    {/* Academic Standing */}
+                    <View className="w-full mt-6 px-4">
                         <View className="flex-row justify-between items-center mb-3">
                             <Text className={`text-sm font-medium ${isDark ? 'text-zinc-400' : 'text-zinc-400'}`}>
                                 Academic Standing
                             </Text>
-                            <Text className={`font-bold tracking-tight ${isSmall ? 'text-lg' : 'text-xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                            <Text className={`font-bold tracking-tight ${isSmall ? 'text-lg' : 'text-xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
                                 {gpaPercent.toFixed(0)}%
                             </Text>
                         </View>
-                        <View className={`w-full rounded-full h-1.5 ${isDark ? 'bg-zinc-800' : 'bg-zinc-100'}`}>
+                        <View className={`w-full rounded-full h-1.5 ${isDark ? 'bg-zinc-850' : 'bg-zinc-200/50'}`}>
                             <View
-                                className={`rounded-full h-full ${isDark ? 'bg-white' : 'bg-zinc-900'}`}
+                                className="rounded-full h-full bg-[#FCE454]"
                                 style={{ width: `${gpaPercent}%` }}
                             />
                         </View>
                     </View>
                 </View>
 
+                {/* GPA and Credits Completion Row */}
                 <View className="flex-row px-6 mb-6" style={{ gap: 12 }}>
                     <View
                         className="flex-1 rounded-3xl overflow-hidden"
@@ -290,29 +275,29 @@ export default function Profile() {
                             className="flex-1 p-5 justify-between"
                         >
                             <View
-                                className={`absolute inset-0 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-white'}`}
+                                className={`absolute inset-0 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-white/60'}`}
                                 style={{ borderRadius: 24 }}
                             />
                             <View className="flex-row justify-between items-center">
                                 <View className={`px-3 py-1 rounded-full ${isDark ? 'bg-white/10' : 'bg-black/5'}`}>
-                                    <Text className={`text-xs font-semibold ${isDark ? 'text-zinc-300' : 'text-zinc-500'}`}>GPA</Text>
+                                    <Text className={`text-xs font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-650'}`}>GPA</Text>
                                 </View>
                             </View>
 
                             {editingField === 'gpa' ? (
-                                <View className="flex-row items-center border-b-2 border-pink-500 pb-1 mt-2">
+                                <View className="flex-row items-center border-b-2 border-[#FCE454] pb-1 mt-2">
                                     <TextInput
                                         autoFocus
                                         value={gpa}
                                         onChangeText={setGpa}
                                         onSubmitEditing={() => setEditingField(null)}
                                         keyboardType="decimal-pad"
-                                        className={`flex-1 font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-zinc-900'} p-0 m-0`}
+                                        className={`flex-1 font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'} p-0 m-0`}
                                     />
                                     <TouchableOpacity
                                         onPress={() => setEditingField(null)}
-                                        className="ml-2 bg-pink-500 rounded-full w-6 h-6 items-center justify-center shadow-sm">
-                                        <Ionicons name="checkmark" size={14} color="#fff" />
+                                        className="ml-2 bg-[#2A2A2A] dark:bg-zinc-100 rounded-full w-6 h-6 items-center justify-center shadow-sm">
+                                        <Ionicons name="checkmark" size={14} color={isDark ? '#2A2A2A' : '#FCE454'} />
                                     </TouchableOpacity>
                                 </View>
                             ) : (
@@ -321,7 +306,7 @@ export default function Profile() {
                                     activeOpacity={0.7}
                                     className="mt-2 flex-row items-center justify-between">
 
-                                    <Text className={`font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                                    <Text className={`font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
                                         {gpa || "0.0"}
                                     </Text>
                                     <View className={`w-8 h-8 rounded-full items-center justify-center border ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/5'}`}>
@@ -343,32 +328,32 @@ export default function Profile() {
                             className="flex-1 p-5 justify-between"
                         >
                             <View
-                                className={`absolute inset-0 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-white'}`}
+                                className={`absolute inset-0 border ${isDark ? 'bg-white/5 border-white/10' : 'bg-white/70 border-white/60'}`}
                                 style={{ borderRadius: 24 }}
                             />
                             <View className="flex-row justify-between items-center">
                                 <View className={`px-3 py-1 rounded-full ${isDark ? 'bg-white/10' : 'bg-black/5'}`}>
-                                    <Text className={`text-xs font-semibold ${isDark ? 'text-zinc-300' : 'text-zinc-500'}`}>Credits</Text>
+                                    <Text className={`text-xs font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-650'}`}>Credits</Text>
                                 </View>
                             </View>
 
                             {editingField === 'credits' ? (
-                                <View className="flex-row items-center border-b-2 border-pink-500 pb-1 mt-2">
+                                <View className="flex-row items-center border-b-2 border-[#FCE454] pb-1 mt-2">
                                     <TextInput
                                         autoFocus
                                         value={credits}
                                         onChangeText={setCredits}
                                         onSubmitEditing={() => setEditingField(null)}
                                         keyboardType="number-pad"
-                                        className={`flex-1 font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-zinc-900'} p-0 m-0`}
+                                        className={`flex-1 font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'} p-0 m-0`}
                                     />
-                                    <TouchableOpacity onPress={() => setEditingField(null)} className="ml-2 bg-pink-500 rounded-full w-6 h-6 items-center justify-center shadow-sm">
-                                        <Ionicons name="checkmark" size={14} color="#fff" />
+                                    <TouchableOpacity onPress={() => setEditingField(null)} className="ml-2 bg-[#2A2A2A] dark:bg-zinc-100 rounded-full w-6 h-6 items-center justify-center shadow-sm">
+                                        <Ionicons name="checkmark" size={14} color={isDark ? '#2A2A2A' : '#FCE454'} />
                                     </TouchableOpacity>
                                 </View>
                             ) : (
                                 <TouchableOpacity onPress={() => setEditingField('credits')} activeOpacity={0.7} className="mt-2 flex-row items-center justify-between">
-                                    <Text className={`font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                                    <Text className={`font-bold tracking-tighter ${isSmall ? 'text-3xl' : 'text-4xl'} ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
                                         {credits || "0"}
                                     </Text>
                                     <View className={`w-8 h-8 rounded-full items-center justify-center border ${isDark ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/5'}`}>
@@ -380,17 +365,18 @@ export default function Profile() {
                     </View>
                 </View>
 
+                {/* Settings Section */}
                 <View className="px-6 mt-2">
-                    <Text className={`text-xs font-semibold tracking-widest uppercase mb-4 ml-1 ${isDark ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    <Text className={`text-[10px] font-bold tracking-widest uppercase mb-4 ml-1 ${isDark ? 'text-zinc-600' : 'text-zinc-400'}`}>
                         Settings
                     </Text>
 
-                    <View className={`flex-row items-center justify-between rounded-full px-5 py-3.5 mb-3 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}>
+                    <View className={`flex-row items-center justify-between rounded-full px-5 py-3.5 mb-3 border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-150'}`} style={!isDark && { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.02, shadowRadius: 8 }}>
                         <View className="flex-row items-center" style={{ gap: 14 }}>
-                            <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`}>
-                                <Ionicons name={isDark ? 'moon-outline' : 'sunny-outline'} size={16} color={isDark ? '#fff' : '#000'} />
+                            <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-zinc-100'}`}>
+                                <Ionicons name={isDark ? 'moon-outline' : 'sunny-outline'} size={16} color={isDark ? '#fff' : '#2A2A2A'} />
                             </View>
-                            <Text className={`text-sm font-medium ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                            <Text className={`text-sm font-medium ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
                                 Dark Mode
                             </Text>
                         </View>
@@ -398,7 +384,7 @@ export default function Profile() {
                         <TouchableOpacity
                             onPress={toggleTheme}
                             activeOpacity={0.8}
-                            className={`rounded-full justify-center ${isDark ? 'bg-pink-500' : 'bg-zinc-300'}`}
+                            className={`rounded-full justify-center ${isDark ? 'bg-[#FCE454]' : 'bg-zinc-200'}`}
                             style={{ width: 50, height: 28, paddingHorizontal: 3 }}
                         >
                             <View
@@ -408,21 +394,22 @@ export default function Profile() {
                                 <Ionicons
                                     name={isDark ? 'moon' : 'sunny'}
                                     size={11}
-                                    color={isDark ? '#ff4d8d' : '#f59e0b'}
+                                    color={isDark ? '#2A2A2A' : '#f59e0b'}
                                 />
                             </View>
                         </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity
-                        className={`flex-row items-center justify-between rounded-full px-5 py-3.5 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'}`}
+                        className={`flex-row items-center justify-between rounded-full px-5 py-3.5 border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-150'}`}
+                        style={!isDark && { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.02, shadowRadius: 8 }}
                         activeOpacity={0.7}
                     >
                         <View className="flex-row items-center" style={{ gap: 14 }}>
-                            <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`}>
-                                <Ionicons name="information-circle-outline" size={16} color={isDark ? '#fff' : '#000'} />
+                            <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-zinc-100'}`}>
+                                <Ionicons name="information-circle-outline" size={16} color={isDark ? '#fff' : '#2A2A2A'} />
                             </View>
-                            <Text className={`text-sm font-medium ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+                            <Text className={`text-sm font-medium ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
                                 About
                             </Text>
                         </View>
@@ -431,6 +418,7 @@ export default function Profile() {
                 </View>
             </ScrollView>
 
+            {/* Unsaved Changes Banner */}
             {hasUnsavedChanges && (
                 <View
                     className="absolute bottom-6 left-6 right-6"
@@ -443,13 +431,13 @@ export default function Profile() {
                     }}
                 >
                     <TouchableOpacity
-                        className="bg-zinc-900 py-4 px-6 rounded-full flex-row items-center justify-between"
+                        className="bg-zinc-900 dark:bg-zinc-800 py-4 px-6 rounded-full flex-row items-center justify-between border border-zinc-800"
                         onPress={handleSave}
                         activeOpacity={0.9}
                     >
                         <Text className="text-white font-semibold text-base">Unsaved changes</Text>
-                        <View className="bg-pink-500 px-4 py-1.5 rounded-full">
-                            <Text className="text-white font-bold text-sm">Save</Text>
+                        <View className="bg-[#FCE454] px-4 py-1.5 rounded-full">
+                            <Text className="text-[#2A2A2A] font-bold text-sm">Save</Text>
                         </View>
                     </TouchableOpacity>
                 </View>
