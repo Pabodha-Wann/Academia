@@ -1,3 +1,4 @@
+import { GpaService } from '@/services/gpaService';
 import { ScheduleService } from '@/services/scheduleService';
 import { TaskService } from '@/services/taskService';
 import { useGpaStore } from '@/store/gpaStore';
@@ -57,7 +58,7 @@ function getGpaLabel(gpa: number): string {
 export default function Dashboard() {
   const isDark = useThemeStore((state) => state.isDark);
   const { profile, loadProfile } = useProfileStore();
-  const { entries, calculatedGpa, loadEntries } = useGpaStore();
+  const { entries, calculatedGpa } = useGpaStore();
   const { entries: scheduleEntries, selectedDate: scheduleDate } = useScheduleStore();
   const { tasks, selectedDate: taskDate } = useTaskStore();
   const insets = useSafeAreaInsets();
@@ -68,7 +69,7 @@ export default function Dashboard() {
   useFocusEffect(
     useCallback(() => {
       loadProfile();
-      loadEntries();
+      GpaService.loadEntries();
       ScheduleService.loadSchedule(today);
       TaskService.loadTasks(today);
     }, [])

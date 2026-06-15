@@ -1,3 +1,4 @@
+import { GpaService } from '@/services/gpaService';
 import { useGpaStore } from '@/store/gpaStore';
 import { useProfileStore } from '@/store/profileStore';
 import { useThemeStore } from '@/store/themestore';
@@ -46,7 +47,7 @@ function getGpaBarColor(gpa: number): string {
 
 export default function GpaCalculator() {
     const isDark = useThemeStore((state) => state.isDark);
-    const { entries, calculatedGpa, loadEntries, addEntry, removeEntry } = useGpaStore();
+    const { entries, calculatedGpa } = useGpaStore();
 
     const { profile, saveProfile } = useProfileStore();
     const insets = useSafeAreaInsets();
@@ -57,7 +58,7 @@ export default function GpaCalculator() {
     const [selectedCredits, setSelectedCredits] = useState(3);
 
     useEffect(() => {
-        loadEntries();
+        GpaService.loadEntries();
     }, []);
 
     const gpaPercent = Math.min((calculatedGpa / 4.0) * 100, 100);
@@ -67,7 +68,7 @@ export default function GpaCalculator() {
             Alert.alert('Error', 'Subject name is required.');
             return;
         }
-        addEntry(
+        GpaService.addEntry(
             subject.trim(),
             selectedGrade.label,
             selectedGrade.value,
@@ -321,7 +322,7 @@ export default function GpaCalculator() {
 
                                     {/* Delete */}
                                     <TouchableOpacity
-                                        onPress={() => removeEntry(entry.id)}
+                                        onPress={() => GpaService.removeEntry(entry.id)}
                                         className={`w-8 h-8 rounded-lg items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-zinc-100'}`}
                                     >
                                         <Ionicons
