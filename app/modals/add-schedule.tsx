@@ -104,7 +104,7 @@ export default function AddSchedule() {
                 await scheduleClassNotifications(
                     parseInt(entryId!),
                     subject.name,
-                    selectedDate,
+                    date,
                     startTime,
                     location.trim() || null,
                 )
@@ -127,7 +127,7 @@ export default function AddSchedule() {
                 await scheduleClassNotifications(
                     latest.id,
                     subject.name,
-                    selectedDate,
+                    date,
                     startTime,
                     location.trim() || null,
                 );

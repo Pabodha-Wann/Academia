@@ -7,91 +7,92 @@ export async function scheduleTaskNotifications(
     title: string,
     dueDate: string,
 ): Promise<void> {
-    const { taskReminders } = useNotficationStore.getState();
-    if (!taskReminders) return
+    try {
+        const { taskReminders } = useNotficationStore.getState();
+        if (!taskReminders) return
 
-    //if task aleady done
-    const { tasks } = useTaskStore.getState();
-    const task = tasks.find((t) => t.id === taskId);
-    if (task?.status === 'done') {
+        //if task aleady done
+        const { tasks } = useTaskStore.getState();
+        const task = tasks.find((t) => t.id === taskId);
+        if (task?.status === 'done') {
+            await cancelTaskNotifications(taskId);
+            return;
+        }
+
+        const due = new Date(dueDate)
+        due.setMinutes(due.getMinutes() + due.getTimezoneOffset());
+
+        const now = new Date();
+
+        //check if due date is in past
+        if (due < now) {
+            await cancelTaskNotifications(taskId);
+            return;
+        }
+
+        //Day before 8 AM
+        const dayBefore = new Date(due);
+        dayBefore.setDate(due.getDate() - 1);
+        dayBefore.setHours(8, 0, 0, 0);
+
+        //Same day 8AM
+        const sameDay = new Date(due);
+        sameDay.setHours(8, 0, 0, 0);
+
+        //cancel
         await cancelTaskNotifications(taskId);
-        return;
-    }
 
-    const due = new Date(dueDate)
-    due.setMinutes(due.getMinutes() + due.getTimezoneOffset());
+        if (dayBefore > now) {
+            await Notifications.scheduleNotificationAsync({
+                identifier: `task-${taskId}-before`,
+                content: {
+                    title: `📚 Task Due Tomorrow`,
+                    body: `"${title}" is due tomorrow. Don't forget!`,
+                    data: { taskId, type: 'task' },
+                    sound: true,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: dayBefore
+                }
+            });
+        }
 
-    const now = new Date();
+        if (sameDay > now) {
+            await Notifications.scheduleNotificationAsync({
+                identifier: `task-${taskId}-same`,
+                content: {
+                    title: '📚 Assignment Due Today',
+                    body: `"${title}" is due today. Submit it now!`,
+                    data: { taskId, type: 'task' },
+                    sound: true,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: sameDay,
+                },
+            });
+        }
 
-    //check if due date is in past
-    if (due < now) {
-        await cancelTaskNotifications(taskId);
-        return;
-    }
+        const testTime = new Date();
+        testTime.setSeconds(testTime.getSeconds() + 10);
 
-    //Day before 8 AM
-    const dayBefore = new Date(due);
-    dayBefore.setDate(due.getDate() - 1);
-    dayBefore.setHours(8, 0, 0, 0);
-
-    //Same day 8AM
-    const sameDay = new Date(due);
-    sameDay.setHours(8, 0, 0, 0);
-
-
-
-    //cancel
-    await cancelTaskNotifications(taskId);
-
-    if (dayBefore > now) {
-        await Notifications.scheduleNotificationAsync({
-            identifier: `task-${taskId}-before`,
-            content: {
-                title: `📚 Task Due Tomorrow`,
-                body: `${title}" is due tomorrow. Don't forget!`,
-                data: { taskId, type: 'task' },
-                sound: true,
-
-            },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: dayBefore
-            }
-        });
-    }
-
-    if (sameDay > now) {
-        await Notifications.scheduleNotificationAsync({
-            identifier: `task-${taskId}-same`,
-            content: {
-                title: '📚 Assignment Due Today',
-                body: `"${title}" is due today. Submit it now!`,
-                data: { taskId, type: 'task' },
-                sound: true,
-            },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: sameDay,
-            },
-        });
-    }
-
-    const testTime = new Date();
-    testTime.setSeconds(testTime.getSeconds() + 10);
-
-    if (true) {
-        await Notifications.scheduleNotificationAsync({
-            identifier: `task-${taskId}-24h`,
-            content: {
-                title: '📚 Due in 24 Hours',
-                body: `"${title}" is due tomorrow`,
-                sound: true,
-            },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: testTime,
-            },
-        });
+        if (true) {
+            await Notifications.scheduleNotificationAsync({
+                identifier: `task-${taskId}-24h`,
+                content: {
+                    title: '📚 Due in 24 Hours',
+                    body: `"${title}" is due tomorrow`,
+                    sound: true,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: testTime,
+                },
+            });
+        }
+    } catch (error) {
+        console.warn('Failed to schedule task notifications:', error);
     }
 }
 
@@ -104,65 +105,69 @@ export async function scheduleClassNotifications(
     startTime: string,
     location: string | null,
 ): Promise<void> {
-    const { classReminders } = useNotficationStore.getState();
-    if (!classReminders) return;
+    try {
+        const { classReminders } = useNotficationStore.getState();
+        if (!classReminders) return;
 
-    // Parse date cleanly
-    const [year, month, day] = date.split('-').map(Number);
-    const [hours, minutes] = startTime.split(':').map(Number);
+        // Parse date cleanly
+        const [year, month, day] = date.split('-').map(Number);
+        const [hours, minutes] = startTime.split(':').map(Number);
 
-    // Build class start datetime in local time
-    const classStart = new Date(year, month - 1, day, hours, minutes, 0);
-    const now = new Date();
+        // Build class start datetime in local time
+        const classStart = new Date(year, month - 1, day, hours, minutes, 0);
+        const now = new Date();
 
-    // If class already started or passed 
-    if (classStart < now) {
+        // If class already started or passed 
+        if (classStart < now) {
+            await cancelClassNotifications(scheduleId);
+            return;
+        }
+
+        // 30 mins before
+        const thirtyBefore = new Date(classStart);
+        thirtyBefore.setMinutes(classStart.getMinutes() - 30);
+
+        // 15 mins before
+        const fifteenBefore = new Date(classStart);
+        fifteenBefore.setMinutes(classStart.getMinutes() - 15);
+
+        const locationText = location ? ` · ${location}` : '';
+
         await cancelClassNotifications(scheduleId);
-        return;
-    }
 
-    // 30 mins before
-    const thirtyBefore = new Date(classStart);
-    thirtyBefore.setMinutes(classStart.getMinutes() - 30);
+        if (thirtyBefore > now) {
+            await Notifications.scheduleNotificationAsync({
+                identifier: `class-${scheduleId}-30`,
+                content: {
+                    title: '📅 Class in 30 Minutes',
+                    body: `${subjectName} starts soon${locationText}`,
+                    data: { scheduleId, type: 'class' },
+                    sound: true,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: thirtyBefore,
+                },
+            });
+        }
 
-    // 15 mins before
-    const fifteenBefore = new Date(classStart);
-    fifteenBefore.setMinutes(classStart.getMinutes() - 15);
-
-    const locationText = location ? ` · ${location}` : '';
-
-    await cancelClassNotifications(scheduleId);
-
-    if (thirtyBefore > now) {
-        await Notifications.scheduleNotificationAsync({
-            identifier: `class-${scheduleId}-30`,
-            content: {
-                title: '📅 Class in 30 Minutes',
-                body: `${subjectName} starts soon${locationText}`,
-                data: { scheduleId, type: 'class' },
-                sound: true,
-            },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: thirtyBefore,
-            },
-        });
-    }
-
-    if (fifteenBefore > now) {
-        await Notifications.scheduleNotificationAsync({
-            identifier: `class-${scheduleId}-15`,
-            content: {
-                title: '📅 Class in 15 Minutes',
-                body: `${subjectName} is starting soon${locationText}`,
-                data: { scheduleId, type: 'class' },
-                sound: true,
-            },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: fifteenBefore,
-            },
-        });
+        if (fifteenBefore > now) {
+            await Notifications.scheduleNotificationAsync({
+                identifier: `class-${scheduleId}-15`,
+                content: {
+                    title: '📅 Class in 15 Minutes',
+                    body: `${subjectName} is starting soon${locationText}`,
+                    data: { scheduleId, type: 'class' },
+                    sound: true,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: fifteenBefore,
+                },
+            });
+        }
+    } catch (error) {
+        console.warn('Failed to schedule class notifications:', error);
     }
 }
 
