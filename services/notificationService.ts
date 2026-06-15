@@ -95,6 +95,82 @@ export async function scheduleTaskNotifications(
     }
 }
 
+// ─── Class Notifications ──────────────────────────
+
+export async function scheduleClassNotifications(
+    scheduleId: number,
+    subjectName: string,
+    date: string,
+    startTime: string,
+    location: string | null,
+): Promise<void> {
+    const { classReminders } = useNotficationStore.getState();
+    if (!classReminders) return;
+
+    // Parse date cleanly
+    const [year, month, day] = date.split('-').map(Number);
+    const [hours, minutes] = startTime.split(':').map(Number);
+
+    // Build class start datetime in local time
+    const classStart = new Date(year, month - 1, day, hours, minutes, 0);
+    const now = new Date();
+
+    // If class already started or passed 
+    if (classStart < now) {
+        await cancelClassNotifications(scheduleId);
+        return;
+    }
+
+    // 30 mins before
+    const thirtyBefore = new Date(classStart);
+    thirtyBefore.setMinutes(classStart.getMinutes() - 30);
+
+    // 15 mins before
+    const fifteenBefore = new Date(classStart);
+    fifteenBefore.setMinutes(classStart.getMinutes() - 15);
+
+    const locationText = location ? ` · ${location}` : '';
+
+    await cancelClassNotifications(scheduleId);
+
+    if (thirtyBefore > now) {
+        await Notifications.scheduleNotificationAsync({
+            identifier: `class-${scheduleId}-30`,
+            content: {
+                title: '📅 Class in 30 Minutes',
+                body: `${subjectName} starts soon${locationText}`,
+                data: { scheduleId, type: 'class' },
+                sound: true,
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: thirtyBefore,
+            },
+        });
+    }
+
+    if (fifteenBefore > now) {
+        await Notifications.scheduleNotificationAsync({
+            identifier: `class-${scheduleId}-15`,
+            content: {
+                title: '📅 Class in 15 Minutes',
+                body: `${subjectName} is starting soon${locationText}`,
+                data: { scheduleId, type: 'class' },
+                sound: true,
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: fifteenBefore,
+            },
+        });
+    }
+}
+
+export async function cancelClassNotifications(scheduleId: number): Promise<void> {
+    await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-30`).catch(() => { });
+    await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-15`).catch(() => { });
+}
+
 
 
 export async function cancelTaskNotifications(taskId: number): Promise<void> {

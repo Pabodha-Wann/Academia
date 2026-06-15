@@ -1,4 +1,5 @@
-import { addTask, deleteTask, getTaskByDate, toggleTaskStatus, updateTask, getAllTasks } from "@/database/queries/tasks";
+import { addTask, deleteTask, getAllTasks, getTaskByDate, toggleTaskStatus, updateTask } from "@/database/queries/tasks";
+import { cancelTaskNotifications } from "@/services/notificationService";
 import { Task } from "@/types";
 import { format } from "date-fns";
 import { create } from "zustand";
@@ -71,6 +72,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     },
 
     removeTask: (id) => {
+        cancelTaskNotifications(id);
         deleteTask(id)
         const tasks = get().selectedDate ? getTaskByDate(get().selectedDate!) : getAllTasks();
         set({ tasks })

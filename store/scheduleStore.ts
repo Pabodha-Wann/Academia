@@ -1,4 +1,5 @@
 import { addScheduleEntry, deleteSchedule, getScheduleByDate, updateScheduleEntry } from "@/database/queries/schedule";
+import { cancelClassNotifications } from "@/services/notificationService";
 import { ScheduleEntry } from "@/types";
 import { format } from "date-fns";
 import { create } from "zustand";
@@ -53,6 +54,7 @@ export const useScheduleStore = create<ScheduleStore>((set, get) => ({
     },
 
     removeEntry: (id, date) => {
+        cancelClassNotifications(id);
         deleteSchedule(id);
         const entries = getScheduleByDate(date)
         set({ entries })

@@ -1,3 +1,4 @@
+import { scheduleClassNotifications } from '@/services/notificationService';
 import { useScheduleStore } from '@/store/scheduleStore';
 import { useSubjectStore } from '@/store/subjectStore';
 import { useThemeStore } from '@/store/themestore';
@@ -40,7 +41,7 @@ export default function AddSchedule() {
     const [location, setLocation] = useState(existingEntry?.location ?? '');
     const [startTime, setStartTime] = useState(existingEntry?.start_time ?? '08:00');
     const [endTime, setEndTime] = useState(existingEntry?.end_time ?? '10:00');
-    
+
     // Date state
     const [date, setDate] = useState(existingEntry?.date ?? selectedDate ?? format(new Date(), 'yyyy-MM-dd'));
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -72,7 +73,7 @@ export default function AddSchedule() {
         ]).start();
     }, []);
 
-    function handleAdd() {
+    async function handleAdd() {
         if (!selectedSubjectId) {
             Alert.alert('Error', 'Please select a subject.');
             return;
@@ -97,6 +98,17 @@ export default function AddSchedule() {
                 endTime,
                 location.trim()
             );
+
+            const subject = subjects.find((s) => s.id === selectedSubjectId)
+            if (subject) {
+                await scheduleClassNotifications(
+                    parseInt(entryId!),
+                    subject.name,
+                    selectedDate,
+                    startTime,
+                    location.trim() || null,
+                )
+            }
             router.back();
         } else {
             addEntry(
@@ -108,6 +120,18 @@ export default function AddSchedule() {
                 endTime,
                 location.trim()
             );
+
+            const subject = subjects.find((s) => s.id === selectedSubjectId);
+            const latest = useScheduleStore.getState().entries.slice(-1)[0];
+            if (subject && latest) {
+                await scheduleClassNotifications(
+                    latest.id,
+                    subject.name,
+                    selectedDate,
+                    startTime,
+                    location.trim() || null,
+                );
+            }
             router.back();
         }
     }
@@ -144,7 +168,7 @@ export default function AddSchedule() {
                     style={{ paddingBottom: insets.bottom + 20 }}
                 >
                     <View className="items-center pt-4 mb-2">
-                    <View className={`w-12 h-1.5 rounded-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
+                        <View className={`w-12 h-1.5 rounded-full ${isDark ? 'bg-zinc-800' : 'bg-zinc-200'}`} />
                     </View>
 
                     <ScrollView
@@ -213,9 +237,8 @@ export default function AddSchedule() {
                         </Text>
                         <TouchableOpacity
                             onPress={() => setShowDatePicker(true)}
-                            className={`flex-row items-center justify-between rounded-2xl px-5 py-4 mb-6 ${
-                                isDark ? 'bg-zinc-900 border border-zinc-800' : 'bg-[#FCE454]'
-                            }`}
+                            className={`flex-row items-center justify-between rounded-2xl px-5 py-4 mb-6 ${isDark ? 'bg-zinc-900 border border-zinc-800' : 'bg-[#FCE454]'
+                                }`}
                         >
                             <Text className={`text-base font-semibold ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
                                 {formattedDate}
@@ -236,9 +259,8 @@ export default function AddSchedule() {
                                     setTempMinute(parseInt(m) || 0);
                                     setShowTimePicker(true);
                                 }}
-                                className={`flex-1 rounded-2xl px-5 py-4 border items-center justify-center ${
-                                    isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'
-                                }`}
+                                className={`flex-1 rounded-2xl px-5 py-4 border items-center justify-center ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'
+                                    }`}
                                 style={!isDark ? { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 8 } : {}}
                             >
                                 <Text className="text-xs text-zinc-400 mb-1">Start Time</Text>
@@ -257,9 +279,8 @@ export default function AddSchedule() {
                                     setTempMinute(parseInt(m) || 0);
                                     setShowTimePicker(true);
                                 }}
-                                className={`flex-1 rounded-2xl px-5 py-4 border items-center justify-center ${
-                                    isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'
-                                }`}
+                                className={`flex-1 rounded-2xl px-5 py-4 border items-center justify-center ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'
+                                    }`}
                                 style={!isDark ? { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.03, shadowRadius: 8 } : {}}
                             >
                                 <Text className="text-xs text-zinc-400 mb-1">End Time</Text>
@@ -293,11 +314,10 @@ export default function AddSchedule() {
                                     <TouchableOpacity
                                         key={t}
                                         onPress={() => setType(t)}
-                                        className={`flex-1 py-3.5 rounded-xl border items-center ${
-                                            isActive
-                                                ? t === 'Online' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-[#FCE454]/20 border-[#FCE454]/30'
-                                                : isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'
-                                        }`}
+                                        className={`flex-1 py-3.5 rounded-xl border items-center ${isActive
+                                            ? t === 'Online' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-[#FCE454]/20 border-[#FCE454]/30'
+                                            : isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'
+                                            }`}
                                         style={isActive ? { backgroundColor: t === 'Online' ? '#10b98120' : '#FCE45420', borderColor: t === 'Online' ? '#10b98140' : '#FCE45440' } : {}}
                                         activeOpacity={0.8}
                                     >
@@ -385,7 +405,7 @@ export default function AddSchedule() {
                         <Text className={`text-lg font-bold text-center mb-6 ${isDark ? 'text-white' : 'text-[#2A2A2A]'}`}>
                             {pickingType === 'start' ? 'Select Start Time' : 'Select End Time'}
                         </Text>
-                        
+
                         {/* Pickers Container */}
                         <View className="flex-row justify-center h-48 px-6 mb-6">
                             {/* Hours column */}
