@@ -1,4 +1,5 @@
 import { useNotficationStore } from "@/store/notificationStore";
+import { useTaskStore } from "@/store/taskStore";
 import * as Notifications from 'expo-notifications';
 
 export async function scheduleTaskNotifications(
@@ -9,10 +10,24 @@ export async function scheduleTaskNotifications(
     const { taskReminders } = useNotficationStore.getState();
     if (!taskReminders) return
 
+    //if task aleady done
+    const { tasks } = useTaskStore.getState();
+    const task = tasks.find((t) => t.id === taskId);
+    if (task?.status === 'done') {
+        await cancelTaskNotifications(taskId);
+        return;
+    }
+
     const due = new Date(dueDate)
     due.setMinutes(due.getMinutes() + due.getTimezoneOffset());
 
     const now = new Date();
+
+    //check if due date is in past
+    if (due < now) {
+        await cancelTaskNotifications(taskId);
+        return;
+    }
 
     //Day before 8 AM
     const dayBefore = new Date(due);
