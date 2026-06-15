@@ -1,4 +1,5 @@
 import WeekStrip from '@/components/WeekStrip';
+import { TaskService } from '@/services/taskService';
 import { useProfileStore } from '@/store/profileStore';
 import { useTaskStore } from '@/store/taskStore';
 import { useThemeStore } from '@/store/themestore';
@@ -24,11 +25,11 @@ const FILTERS = [
 export default function Tasks() {
     const isDark = useThemeStore((state) => state.isDark);
     const { profile, loadProfile } = useProfileStore();
-    const { tasks, selectedDate, filterStatus, loadTasks, setSelectedDate, setFilterStatus, toggleTaskStatus, removeTask } = useTaskStore();
+    const { tasks, selectedDate, filterStatus } = useTaskStore();
     const insets = useSafeAreaInsets();
 
     useEffect(() => {
-        loadTasks(selectedDate);
+        TaskService.loadTasks(selectedDate);
         loadProfile();
     }, []);
 
@@ -43,7 +44,7 @@ export default function Tasks() {
     function handleDelete(id: number, title: string) {
         Alert.alert('Delete Task', `Delete "${title}"?`, [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => removeTask(id) },
+            { text: 'Delete', style: 'destructive', onPress: () => TaskService.deleteTask(id) },
         ]);
     }
 
@@ -65,7 +66,7 @@ export default function Tasks() {
                     <View className="flex-row items-center gap-3">
                         {/* View All Tasks Button */}
                         <TouchableOpacity
-                            onPress={() => setSelectedDate(null)}
+                            onPress={() => TaskService.setSelectedDate(null)}
                             className={`w-12 h-12 rounded-full items-center justify-center border ${
                                 isViewingAll
                                     ? 'bg-[#FCE454] border-[#FCE454]'
@@ -92,7 +93,7 @@ export default function Tasks() {
                 </View>
 
                 {/* Yellow style Week Strip */}
-                <WeekStrip selectedDate={selectedDate || ''} onDateSelect={setSelectedDate} />
+                <WeekStrip selectedDate={selectedDate || ''} onDateSelect={(date) => TaskService.setSelectedDate(date)} />
 
                 {/* Filter section as pastel pills */}
                 <View className="px-6 mt-6 mb-4">
@@ -103,7 +104,7 @@ export default function Tasks() {
                                 return (
                                     <TouchableOpacity
                                         key={f.value}
-                                        onPress={() => setFilterStatus(f.value as any)}
+                                        onPress={() => TaskService.setFilterStatus(f.value as any)}
                                         className={`px-5 py-2.5 rounded-xl border ${isActive ? f.colorClass : isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'}`}
                                         activeOpacity={0.7}
                                     >
@@ -137,7 +138,7 @@ export default function Tasks() {
                                 style={!isDark && { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.02, shadowRadius: 8 }}
                             >
                                 <View className="flex-row items-center gap-4">
-                                    <TouchableOpacity onPress={() => toggleTaskStatus(task.id, task.status)}>
+                                    <TouchableOpacity onPress={() => TaskService.toggleTaskStatus(task.id, task.status)}>
                                         <View className={`w-6 h-6 rounded-md border items-center justify-center ${task.status === 'done' ? 'bg-[#2A2A2A] border-[#2A2A2A]' : isDark ? 'border-zinc-600' : 'border-zinc-300'}`}>
                                             {task.status === 'done' && <Ionicons name="checkmark" size={14} color="#FCE454" />}
                                         </View>

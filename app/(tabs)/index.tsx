@@ -1,3 +1,4 @@
+import { TaskService } from '@/services/taskService';
 import { useGpaStore } from '@/store/gpaStore';
 import { useProfileStore } from '@/store/profileStore';
 import { useScheduleStore } from '@/store/scheduleStore';
@@ -57,7 +58,7 @@ export default function Dashboard() {
   const { profile, loadProfile } = useProfileStore();
   const { entries, calculatedGpa, loadEntries } = useGpaStore();
   const { entries: scheduleEntries, selectedDate: scheduleDate, loadSchedule } = useScheduleStore();
-  const { tasks, selectedDate: taskDate, loadTasks } = useTaskStore();
+  const { tasks, selectedDate: taskDate } = useTaskStore();
   const insets = useSafeAreaInsets();
 
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -68,7 +69,7 @@ export default function Dashboard() {
       loadProfile();
       loadEntries();
       loadSchedule(today);
-      loadTasks(today);
+      TaskService.loadTasks(today);
     }, [])
   );
 

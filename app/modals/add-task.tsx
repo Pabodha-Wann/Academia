@@ -1,6 +1,4 @@
-import {
-    scheduleTaskNotifications
-} from '@/services/notificationService';
+import { TaskService } from '@/services/taskService';
 import { useSubjectStore } from '@/store/subjectStore';
 import { useTaskStore } from '@/store/taskStore';
 import { useThemeStore } from '@/store/themestore';
@@ -27,7 +25,7 @@ const PRIORITIES = ['low', 'medium', 'high'] as const;
 
 export default function AddTask() {
     const isDark = useThemeStore((state) => state.isDark);
-    const { selectedDate, tasks, addTask, updateTask } = useTaskStore();
+    const { selectedDate, tasks } = useTaskStore();
     const { subjects, loadSubjects } = useSubjectStore();
     const insets = useSafeAreaInsets();
 
@@ -86,15 +84,9 @@ export default function AddTask() {
             return;
         }
         if (isEditing) {
-            updateTask(parseInt(taskId!), selectedSubjectId, title.trim(), description.trim(), dueDate, priority);
-            await scheduleTaskNotifications(parseInt(taskId!), title.trim(), dueDate);
+            await TaskService.updateTask(parseInt(taskId!), selectedSubjectId, title.trim(), description.trim(), dueDate, priority);
         } else {
-            addTask(selectedSubjectId, title.trim(), description.trim(), dueDate, priority);
-            const allTasks = useTaskStore.getState().tasks;
-            const latest = allTasks[allTasks.length - 1];
-            if (latest) {
-                await scheduleTaskNotifications(latest.id, title.trim(), dueDate);
-            }
+            await TaskService.createTask(selectedSubjectId, title.trim(), description.trim(), dueDate, priority);
         }
 
         router.back();
