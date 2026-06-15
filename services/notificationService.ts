@@ -195,6 +195,7 @@ export async function scheduleClassNotifications(
 export async function cancelClassNotifications(scheduleId: number): Promise<void> {
     await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-30`).catch(() => { });
     await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-15`).catch(() => { });
+    await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-test`).catch(() => { });
 }
 
 
