@@ -44,11 +44,15 @@ export function initializeDatabase() {
       created_at  TEXT DEFAULT (datetime('now'))
     );
 
+    DROP TABLE IF EXISTS notifications;
     CREATE TABLE IF NOT EXISTS notifications (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      task_id      INTEGER REFERENCES tasks(id),
-      scheduled_at TEXT NOT NULL,
-      notif_id     TEXT
+      title        TEXT NOT NULL,
+      body         TEXT NOT NULL,
+      type         TEXT NOT NULL CHECK(type IN ('task', 'class')),
+      reference_id INTEGER,
+      triggered_at TEXT NOT NULL,
+      is_read      INTEGER DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS gpa_entries (

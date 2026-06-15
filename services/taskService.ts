@@ -1,4 +1,5 @@
 import db from "@/database/db";
+import { clearAllDbNotificationsForReference } from "@/database/queries/notifications";
 import * as taskDb from "@/database/queries/tasks";
 import { cancelTaskNotifications, scheduleTaskNotifications } from "@/services/notificationService";
 import { useTaskStore } from "@/store/taskStore";
@@ -89,9 +90,8 @@ export const TaskService = {
 
 
     async deleteTask(id: number): Promise<void> {
-
         await cancelTaskNotifications(id);
-
+        clearAllDbNotificationsForReference(id, 'task');
         taskDb.deleteTask(id);
 
         const currentSelectedDate = useTaskStore.getState().selectedDate;

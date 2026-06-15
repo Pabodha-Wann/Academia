@@ -50,3 +50,13 @@ export interface GpaEntry {
     semester: string | null;
     created_at: string;
 }
+
+export interface DbNotification {
+    id: number;
+    title: string;
+    body: string;
+    type: 'task' | 'class';
+    reference_id: number;
+    triggered_at: string;
+    is_read: number;
+}

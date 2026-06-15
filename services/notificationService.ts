@@ -1,3 +1,4 @@
+import { insertDbNotification, clearDbNotificationsByReference } from "@/database/queries/notifications";
 import { useNotficationStore } from "@/store/notificationStore";
 import { useTaskStore } from "@/store/taskStore";
 import * as Notifications from 'expo-notifications';
@@ -58,6 +59,14 @@ export async function scheduleTaskNotifications(
                     date: dayBefore
                 }
             });
+
+            insertDbNotification(
+                `📚 Task Due Tomorrow`,
+                `"${title}" is due tomorrow. Don't forget!`,
+                'task',
+                taskId,
+                dayBefore.toISOString()
+            );
         }
 
         if (sameDay > now) {
@@ -74,6 +83,14 @@ export async function scheduleTaskNotifications(
                     date: sameDay,
                 },
             });
+
+            insertDbNotification(
+                '📚 Assignment Due Today',
+                `"${title}" is due today. Submit it now!`,
+                'task',
+                taskId,
+                sameDay.toISOString()
+            );
         }
 
         const testTime = new Date();
@@ -92,6 +109,14 @@ export async function scheduleTaskNotifications(
                     date: testTime,
                 },
             });
+
+            insertDbNotification(
+                '📚 Due in 24 Hours (Test)',
+                `"${title}" is due tomorrow`,
+                'task',
+                taskId,
+                testTime.toISOString()
+            );
         }
     } catch (error) {
         console.warn('Failed to schedule task notifications:', error);
@@ -151,6 +176,14 @@ export async function scheduleClassNotifications(
                     date: thirtyBefore,
                 },
             });
+
+            insertDbNotification(
+                '📅 Class in 30 Minutes',
+                `${subjectName} starts soon${locationText}`,
+                'class',
+                scheduleId,
+                thirtyBefore.toISOString()
+            );
         }
 
         if (fifteenBefore > now) {
@@ -167,6 +200,14 @@ export async function scheduleClassNotifications(
                     date: fifteenBefore,
                 },
             });
+
+            insertDbNotification(
+                '📅 Class in 15 Minutes',
+                `${subjectName} is starting soon${locationText}`,
+                'class',
+                scheduleId,
+                fifteenBefore.toISOString()
+            );
         }
 
         if (IS_TESTING) {
@@ -185,7 +226,14 @@ export async function scheduleClassNotifications(
                     date: testTime,
                 },
             });
-            return;
+
+            insertDbNotification(
+                '📅 Class Test Notification',
+                `${subjectName} notification is working!`,
+                'class',
+                scheduleId,
+                testTime.toISOString()
+            );
         }
     } catch (error) {
         console.warn('Failed to schedule class notifications:', error);
@@ -196,14 +244,14 @@ export async function cancelClassNotifications(scheduleId: number): Promise<void
     await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-30`).catch(() => { });
     await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-15`).catch(() => { });
     await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-test`).catch(() => { });
+    clearDbNotificationsByReference(scheduleId, 'class');
 }
-
-
 
 export async function cancelTaskNotifications(taskId: number): Promise<void> {
     await Notifications.cancelScheduledNotificationAsync(`task-${taskId}-before`).catch(() => { });
     await Notifications.cancelScheduledNotificationAsync(`task-${taskId}-same`).catch(() => { });
     await Notifications.cancelScheduledNotificationAsync(`task-${taskId}-24h`).catch(() => { })
+    clearDbNotificationsByReference(taskId, 'task');
 }
 
 export async function requestNotificationPermission() {

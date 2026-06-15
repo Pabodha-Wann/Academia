@@ -1,4 +1,5 @@
 import db from "@/database/db";
+import { clearAllDbNotificationsForReference } from "@/database/queries/notifications";
 import * as scheduleDb from "@/database/queries/schedule";
 import { cancelClassNotifications, scheduleClassNotifications } from "@/services/notificationService";
 import { useScheduleStore } from "@/store/scheduleStore";
@@ -87,6 +88,7 @@ export const ScheduleService = {
 
     async deleteEntry(id: number): Promise<void> {
         await cancelClassNotifications(id);
+        clearAllDbNotificationsForReference(id, 'class');
         scheduleDb.deleteSchedule(id);
         const currentSelectedDate = useScheduleStore.getState().selectedDate;
         this.loadSchedule(currentSelectedDate);

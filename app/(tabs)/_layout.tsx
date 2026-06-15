@@ -1,12 +1,19 @@
+import { useNotficationStore } from "@/store/notificationStore";
 import { useThemeStore } from "@/store/themestore";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Tabs } from "expo-router";
+import { Tabs, router } from "expo-router";
+import { useEffect } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function CustomHeader() {
   const isDark = useThemeStore((state) => state.isDark);
   const insets = useSafeAreaInsets();
+  const { unreadCount, loadNotifications } = useNotficationStore();
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
   return (
     <View
@@ -25,13 +32,16 @@ function CustomHeader() {
       {/* Right side: Notification Button */}
       <View className="relative">
         <TouchableOpacity
+          onPress={() => router.push('/modals/notifications')}
           activeOpacity={0.7}
           className={`w-10 h-10 rounded-full items-center justify-center border ${isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-200'
             }`}
         >
           <Ionicons name="notifications-outline" size={20} color={isDark ? '#fff' : '#2A2A2A'} />
         </TouchableOpacity>
-        <View className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#FCE454] border ${isDark ? 'border-[#121212]' : 'border-white'}`} />
+        {unreadCount > 0 && (
+          <View className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#FCE454] border ${isDark ? 'border-[#121212]' : 'border-white'}`} />
+        )}
       </View>
     </View>
   );
