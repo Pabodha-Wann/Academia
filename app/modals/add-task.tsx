@@ -1,3 +1,6 @@
+import {
+    scheduleTaskNotifications
+} from '@/services/notificationService';
 import { useSubjectStore } from '@/store/subjectStore';
 import { useTaskStore } from '@/store/taskStore';
 import { useThemeStore } from '@/store/themestore';
@@ -30,17 +33,14 @@ export default function AddTask() {
 
     const { taskId } = useLocalSearchParams<{ taskId?: string }>();
     const isEditing = !!taskId;
-    const existingTask = isEditing
-        ? tasks.find((t) => t.id === parseInt(taskId!))
-        : null;
 
-    const [title, setTitle] = useState(existingTask?.title ?? '');
-    const [description, setDescription] = useState(existingTask?.description ?? '');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(
-        existingTask?.subject_id ?? null
+        null
     );
-    const [priority, setPriority] = useState(existingTask?.priority ?? 'medium');
-    const [dueDate, setDueDate] = useState(existingTask?.due_date ?? selectedDate ?? format(new Date(), 'yyyy-MM-dd'));
+    const [priority, setPriority] = useState('medium');
+    const [dueDate, setDueDate] = useState(selectedDate ?? format(new Date(), 'yyyy-MM-dd'));
 
     // Controls the visibility of the calendar modal
     const [showDatePicker, setShowDatePicker] = useState(false);
@@ -65,16 +65,38 @@ export default function AddTask() {
         ]).start();
     }, []);
 
-    function handleSave() {
+    useEffect(() => {
+        if (isEditing && tasks.length > 0) {
+            const existingTask = tasks.find(
+                (t) => t.id === parseInt(taskId!)
+            );
+            if (existingTask) {
+                setTitle(existingTask.title);
+                setDescription(existingTask.description ?? '');
+                setSelectedSubjectId(existingTask.subject_id);
+                setPriority(existingTask.priority);
+                setDueDate(existingTask.due_date);
+            }
+        }
+    }, [tasks]);
+
+    async function handleSave() {
         if (!title.trim()) {
             Alert.alert('Error', 'Task title is required.');
             return;
         }
         if (isEditing) {
             updateTask(parseInt(taskId!), selectedSubjectId, title.trim(), description.trim(), dueDate, priority);
+            await scheduleTaskNotifications(parseInt(taskId!), title.trim(), dueDate);
         } else {
             addTask(selectedSubjectId, title.trim(), description.trim(), dueDate, priority);
+            const allTasks = useTaskStore.getState().tasks;
+            const latest = allTasks[allTasks.length - 1];
+            if (latest) {
+                await scheduleTaskNotifications(latest.id, title.trim(), dueDate);
+            }
         }
+
         router.back();
     }
 
@@ -164,8 +186,8 @@ export default function AddTask() {
                                 <TouchableOpacity
                                     onPress={() => setSelectedSubjectId(null)}
                                     className={`px-5 py-2.5 rounded-xl border ${selectedSubjectId === null
-                                            ? 'bg-blue-100 border-blue-200'
-                                            : isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
+                                        ? 'bg-blue-100 border-blue-200'
+                                        : isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-200'
                                         }`}
                                 >
                                     <Text className={`text-sm font-semibold ${selectedSubjectId === null ? 'text-blue-600' : isDark ? 'text-zinc-500' : 'text-zinc-500'}`}>

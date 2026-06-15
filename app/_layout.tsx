@@ -1,4 +1,5 @@
 import { initializeDatabase } from "@/database/schema";
+import { requestNotificationPermission } from "@/services/notificationService";
 import { useThemeStore } from "@/store/themestore";
 import {
   Poppins_400Regular,
@@ -54,19 +55,12 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
-
   useEffect(() => {
     requestNotificationPermission();
   }, []);
 
-  async function requestNotificationPermission() {
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') {
-      console.log('Notification permission denied');
-    }
+  if (!fontsLoaded && !fontError) {
+    return null;
   }
 
   return (
