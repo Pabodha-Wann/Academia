@@ -1,4 +1,4 @@
-import { scheduleClassNotifications } from '@/services/notificationService';
+import { ScheduleService } from '@/services/scheduleService';
 import { useScheduleStore } from '@/store/scheduleStore';
 import { useSubjectStore } from '@/store/subjectStore';
 import { useThemeStore } from '@/store/themestore';
@@ -30,7 +30,7 @@ export default function AddSchedule() {
     const isEditing = !!entryId;
 
     const isDark = useThemeStore((state) => state.isDark);
-    const { selectedDate, addEntry, updateEntry, entries } = useScheduleStore();
+    const { selectedDate, entries } = useScheduleStore();
     const { subjects, loadSubjects } = useSubjectStore();
 
     const existingEntry = isEditing ? entries.find((e) => e.id === parseInt(entryId!)) : null;
@@ -88,7 +88,7 @@ export default function AddSchedule() {
         }
 
         if (isEditing) {
-            updateEntry(
+            await ScheduleService.updateEntry(
                 parseInt(entryId!),
                 selectedSubjectId!,
                 lecturer.trim(),
@@ -98,20 +98,8 @@ export default function AddSchedule() {
                 endTime,
                 location.trim()
             );
-
-            const subject = subjects.find((s) => s.id === selectedSubjectId)
-            if (subject) {
-                await scheduleClassNotifications(
-                    parseInt(entryId!),
-                    subject.name,
-                    date,
-                    startTime,
-                    location.trim() || null,
-                )
-            }
-            router.back();
         } else {
-            addEntry(
+            await ScheduleService.createEntry(
                 selectedSubjectId,
                 lecturer.trim(),
                 type,
@@ -120,20 +108,8 @@ export default function AddSchedule() {
                 endTime,
                 location.trim()
             );
-
-            const subject = subjects.find((s) => s.id === selectedSubjectId);
-            const latest = useScheduleStore.getState().entries.slice(-1)[0];
-            if (subject && latest) {
-                await scheduleClassNotifications(
-                    latest.id,
-                    subject.name,
-                    date,
-                    startTime,
-                    location.trim() || null,
-                );
-            }
-            router.back();
         }
+        router.back();
     }
 
     // Format the date securely for display

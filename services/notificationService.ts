@@ -2,6 +2,8 @@ import { useNotficationStore } from "@/store/notificationStore";
 import { useTaskStore } from "@/store/taskStore";
 import * as Notifications from 'expo-notifications';
 
+const IS_TESTING = true;
+
 export async function scheduleTaskNotifications(
     taskId: number,
     title: string,
@@ -77,7 +79,7 @@ export async function scheduleTaskNotifications(
         const testTime = new Date();
         testTime.setSeconds(testTime.getSeconds() + 10);
 
-        if (true) {
+        if (IS_TESTING) {
             await Notifications.scheduleNotificationAsync({
                 identifier: `task-${taskId}-24h`,
                 content: {
@@ -96,7 +98,7 @@ export async function scheduleTaskNotifications(
     }
 }
 
-// ─── Class Notifications ──────────────────────────
+// Class Notifications
 
 export async function scheduleClassNotifications(
     scheduleId: number,
@@ -165,6 +167,25 @@ export async function scheduleClassNotifications(
                     date: fifteenBefore,
                 },
             });
+        }
+
+        if (IS_TESTING) {
+            const testTime = new Date();
+            testTime.setSeconds(testTime.getSeconds() + 10);
+
+            await Notifications.scheduleNotificationAsync({
+                identifier: `class-${scheduleId}-test`,
+                content: {
+                    title: '📅 Class Test Notification',
+                    body: `${subjectName} notification is working!`,
+                    sound: true,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: testTime,
+                },
+            });
+            return;
         }
     } catch (error) {
         console.warn('Failed to schedule class notifications:', error);

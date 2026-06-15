@@ -1,3 +1,4 @@
+import { ScheduleService } from '@/services/scheduleService';
 import { TaskService } from '@/services/taskService';
 import { useGpaStore } from '@/store/gpaStore';
 import { useProfileStore } from '@/store/profileStore';
@@ -57,7 +58,7 @@ export default function Dashboard() {
   const isDark = useThemeStore((state) => state.isDark);
   const { profile, loadProfile } = useProfileStore();
   const { entries, calculatedGpa, loadEntries } = useGpaStore();
-  const { entries: scheduleEntries, selectedDate: scheduleDate, loadSchedule } = useScheduleStore();
+  const { entries: scheduleEntries, selectedDate: scheduleDate } = useScheduleStore();
   const { tasks, selectedDate: taskDate } = useTaskStore();
   const insets = useSafeAreaInsets();
 
@@ -68,7 +69,7 @@ export default function Dashboard() {
     useCallback(() => {
       loadProfile();
       loadEntries();
-      loadSchedule(today);
+      ScheduleService.loadSchedule(today);
       TaskService.loadTasks(today);
     }, [])
   );

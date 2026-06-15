@@ -1,5 +1,6 @@
 import WeekCalendar from '@/components/WeekCalendar';
 import { calculateDuration } from '@/database/queries/schedule';
+import { ScheduleService } from '@/services/scheduleService';
 import { useScheduleStore } from '@/store/scheduleStore';
 import { useSubjectStore } from '@/store/subjectStore';
 import { useThemeStore } from '@/store/themestore';
@@ -29,7 +30,7 @@ function formatTime(time: string): string {
 
 export default function Schedule() {
   const isDark = useThemeStore((state) => state.isDark);
-  const { entries, selectedDate, loadSchedule, setSelectedDate, removeEntry } = useScheduleStore();
+  const { entries, selectedDate } = useScheduleStore();
   const { subjects } = useSubjectStore();
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -37,7 +38,7 @@ export default function Schedule() {
 
 
   useEffect(() => {
-    loadSchedule(selectedDate);
+    ScheduleService.loadSchedule(selectedDate);
   }, []);
 
 
@@ -54,7 +55,7 @@ export default function Schedule() {
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => removeEntry(id, selectedDate),
+        onPress: () => ScheduleService.deleteEntry(id),
       },
     ]);
   }
@@ -69,7 +70,7 @@ export default function Schedule() {
         style={{ zIndex: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 10, elevation: 4 }}>
         <WeekCalendar
           selectedDate={selectedDate}
-          onDateSelect={(date) => setSelectedDate(date)}
+          onDateSelect={(date) => ScheduleService.setSelectedDate(date)}
         />
       </View>
 
