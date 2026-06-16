@@ -9,9 +9,10 @@ import { useThemeStore } from '@/store/themestore';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   Image,
+  InteractionManager,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -57,10 +58,12 @@ function getGpaLabel(gpa: number): string {
 
 export default function Dashboard() {
   const isDark = useThemeStore((state) => state.isDark);
-  const { profile, loadProfile } = useProfileStore();
-  const { entries, calculatedGpa } = useGpaStore();
-  const { entries: scheduleEntries, selectedDate: scheduleDate } = useScheduleStore();
-  const { tasks, selectedDate: taskDate } = useTaskStore();
+  const profile = useProfileStore((state) => state.profile);
+  const loadProfile = useProfileStore((state) => state.loadProfile);
+  const entries = useGpaStore((state) => state.entries);
+  const calculatedGpa = useGpaStore((state) => state.calculatedGpa);
+  const scheduleEntries = useScheduleStore((state) => state.entries);
+  const tasks = useTaskStore((state) => state.tasks);
   const insets = useSafeAreaInsets();
 
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -68,10 +71,13 @@ export default function Dashboard() {
 
   useFocusEffect(
     useCallback(() => {
-      loadProfile();
-      GpaService.loadEntries();
-      ScheduleService.loadSchedule(today);
-      TaskService.loadTasks(today);
+      const interaction = InteractionManager.runAfterInteractions(() => {
+        loadProfile();
+        GpaService.loadEntries();
+        ScheduleService.loadSchedule(today);
+        TaskService.loadTasks(today);
+      });
+      return () => interaction.cancel();
     }, [])
   );
 
@@ -79,14 +85,14 @@ export default function Dashboard() {
   const gpaPercent = Math.min((calculatedGpa / 4.0) * 100, 100);
 
   // Today's pending tasks
-  const pendingTasks = tasks.filter((t) => t.status === 'pending');
-  const doneTasks = tasks.filter((t) => t.status === 'done');
+  const pendingTasks = useMemo(() => tasks.filter((t) => t.status === 'pending'), [tasks]);
+  const doneTasks = useMemo(() => tasks.filter((t) => t.status === 'done'), [tasks]);
 
   // Next upcoming class
   const now = format(new Date(), 'HH:mm');
-  const upcomingClasses = scheduleEntries.filter(
+  const upcomingClasses = useMemo(() => scheduleEntries.filter(
     (e) => e.start_time >= now
-  );
+  ), [scheduleEntries, now]);
 
   // Semester progress (mock — based on credits)
   const totalCreditsNeeded = 120;

@@ -11,9 +11,13 @@ interface ThemeStore {
 export const useThemeStore = create<ThemeStore>((set: any) => ({
     isDark: Appearance.getColorScheme() === "dark",
 
-    toggleTheme: () => set((state: any) => ({
-        isDark: !state.isDark
-    })),
+    toggleTheme: () => {
+        requestAnimationFrame(() => {
+            set((state: any) => ({
+                isDark: !state.isDark
+            }));
+        });
+    },
 
     syncWithSystem: () => set(() => ({ isDark: Appearance.getColorScheme() === "dark" }))
 }))

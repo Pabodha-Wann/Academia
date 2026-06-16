@@ -6,13 +6,14 @@ import { useThemeStore } from '@/store/themestore';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
     Alert,
     ScrollView,
     Text,
     TouchableOpacity,
-    View
+    View,
+    InteractionManager
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,17 +25,25 @@ const FILTERS = [
 
 export default function Tasks() {
     const isDark = useThemeStore((state) => state.isDark);
-    const { profile, loadProfile } = useProfileStore();
-    const { tasks, selectedDate, filterStatus } = useTaskStore();
+    const profile = useProfileStore((state) => state.profile);
+    const loadProfile = useProfileStore((state) => state.loadProfile);
+    const tasks = useTaskStore((state) => state.tasks);
+    const selectedDate = useTaskStore((state) => state.selectedDate);
+    const filterStatus = useTaskStore((state) => state.filterStatus);
     const insets = useSafeAreaInsets();
 
     useEffect(() => {
-        TaskService.loadTasks(selectedDate);
-        loadProfile();
-    }, []);
+        const interaction = InteractionManager.runAfterInteractions(() => {
+            TaskService.loadTasks(selectedDate);
+            loadProfile();
+        });
+        return () => interaction.cancel();
+    }, [selectedDate]);
 
     const isViewingAll = selectedDate === null;
-    const filteredTasks = tasks.filter((t) => filterStatus === 'all' ? true : t.status === filterStatus);
+    const filteredTasks = useMemo(() => {
+        return tasks.filter((t) => filterStatus === 'all' ? true : t.status === filterStatus);
+    }, [tasks, filterStatus]);
     
     const selectedDateObj = selectedDate ? new Date(selectedDate) : new Date();
     if (selectedDate) {

@@ -16,7 +16,8 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ScrollView
+  ScrollView,
+  InteractionManager
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -30,16 +31,20 @@ function formatTime(time: string): string {
 
 export default function Schedule() {
   const isDark = useThemeStore((state) => state.isDark);
-  const { entries, selectedDate } = useScheduleStore();
-  const { subjects } = useSubjectStore();
+  const entries = useScheduleStore((state) => state.entries);
+  const selectedDate = useScheduleStore((state) => state.selectedDate);
+  const subjects = useSubjectStore((state) => state.subjects);
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
 
 
 
   useEffect(() => {
-    ScheduleService.loadSchedule(selectedDate);
-  }, []);
+    const interaction = InteractionManager.runAfterInteractions(() => {
+      ScheduleService.loadSchedule(selectedDate);
+    });
+    return () => interaction.cancel();
+  }, [selectedDate]);
 
 
   // Selected date display
