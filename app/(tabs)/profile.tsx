@@ -406,27 +406,6 @@ export default function Profile() {
                         </View>
                         <Ionicons name="chevron-forward" size={16} color={isDark ? '#52525b' : '#a1a1aa'} />
                     </TouchableOpacity>
-
-                    {/* Reset Onboarding */}
-                    <TouchableOpacity
-                        onPress={async () => {
-                            // 1. Delete ONLY the onboarding flag
-                            await AsyncStorage.removeItem('@has_seen_onboarding');
-                            // 2. Route directly to the screen 
-                            router.replace('/onboarding');
-                        }}
-                        className={`flex-row items-center justify-between rounded-full px-5 py-3.5 mt-3 border ${isDark ? 'bg-red-900/10 border-red-900/30' : 'bg-red-50 border-red-100'}`}
-                        activeOpacity={0.7}
-                    >
-                        <View className="flex-row items-center" style={{ gap: 14 }}>
-                            <View className={`w-8 h-8 rounded-full items-center justify-center ${isDark ? 'bg-red-900/40' : 'bg-red-100'}`}>
-                                <Ionicons name="refresh" size={16} color="#ef4444" />
-                            </View>
-                            <Text className="text-sm font-medium text-red-500">
-                                Reset Onboarding (Dev)
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
                 </View>
             </ScrollView>
 
