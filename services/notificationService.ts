@@ -1,9 +1,9 @@
-import { insertDbNotification, clearDbNotificationsByReference } from "@/database/queries/notifications";
+import { clearDbNotificationsByReference, insertDbNotification } from "@/database/queries/notifications";
 import { useNotficationStore } from "@/store/notificationStore";
 import { useTaskStore } from "@/store/taskStore";
 import * as Notifications from 'expo-notifications';
 
-const IS_TESTING = true;
+const IS_TESTING = false;
 
 export async function scheduleTaskNotifications(
     taskId: number,
@@ -210,6 +210,31 @@ export async function scheduleClassNotifications(
             );
         }
 
+        // On-Time Notification
+        if (classStart > now) {
+            await Notifications.scheduleNotificationAsync({
+                identifier: `class-${scheduleId}-start`,
+                content: {
+                    title: '📅 Class Starting Now',
+                    body: `${subjectName} has started${locationText}`,
+                    data: { scheduleId, type: 'class' },
+                    sound: true,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: classStart,
+                },
+            });
+
+            insertDbNotification(
+                '📅 Class Starting Now',
+                `${subjectName} has started${locationText}`,
+                'class',
+                scheduleId,
+                classStart.toISOString()
+            );
+        }
+
         if (IS_TESTING) {
             const testTime = new Date();
             testTime.setSeconds(testTime.getSeconds() + 10);
@@ -243,6 +268,7 @@ export async function scheduleClassNotifications(
 export async function cancelClassNotifications(scheduleId: number): Promise<void> {
     await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-30`).catch(() => { });
     await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-15`).catch(() => { });
+    await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-start`).catch(() => { });
     await Notifications.cancelScheduledNotificationAsync(`class-${scheduleId}-test`).catch(() => { });
     clearDbNotificationsByReference(scheduleId, 'class');
 }
