@@ -47,6 +47,7 @@ export function calculateDuration(start: string, end: string): string {
     const [endHour, endMin] = end.split(':').map(Number);
 
     const totalMins = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+    if (totalMins <= 0) return "0min";
 
     const hours = Math.floor(totalMins / 60);
     const mins = totalMins % 60;

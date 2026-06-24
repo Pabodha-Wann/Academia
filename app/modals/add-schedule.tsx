@@ -87,6 +87,13 @@ export default function AddSchedule() {
             return;
         }
 
+        const [startH, startM] = startTime.split(':').map(Number);
+        const [endH, endM] = endTime.split(':').map(Number);
+        if (startH * 60 + startM >= endH * 60 + endM) {
+            Alert.alert('Invalid Time', 'Start time must be earlier than end time.');
+            return;
+        }
+
         if (isEditing) {
             await ScheduleService.updateEntry(
                 parseInt(entryId!),
